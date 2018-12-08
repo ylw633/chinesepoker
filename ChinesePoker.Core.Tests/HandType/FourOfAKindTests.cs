@@ -16,10 +16,9 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correctly_identify_4_of_a_kind()
     {
       var cards = Dealer.GetCards("25,32,42,12,22");
-      var hand = new FourOfAKind().GetAHand(cards);
+      var hand = cards.GetHand<FourOfAKind>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.FourOfAKind, hand.HandType);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "12,22,32,42,25");
+      hand.Cards.TestCardsAreInOrder("12,22,32,42,25");
     }
   }
 }

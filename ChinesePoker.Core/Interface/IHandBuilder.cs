@@ -11,8 +11,9 @@ namespace ChinesePoker.Core.Interface
   {
     string HandName { get; }
     bool TestIsHand(IList<Card> cards);
-    IList<Card> SortCards(IList<Card> cards);
-    int GetStrength(IList<Card> cards);
-    int CompareHands(IList<Card> srcCards, IList<Card> targetCards);
+    //IList<Card> SortCards(IList<Card> cards);
+    //int GetStrength(IList<Card> cards);
+    int CompareHands(Hand srcHand, Hand targetHand);
+    Hand GetHand(IList<Card> cards, int handStrengthOffset = 0);
   }
 }

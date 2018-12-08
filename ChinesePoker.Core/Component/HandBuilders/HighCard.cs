@@ -8,7 +8,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
   { 
     public override string HandName => nameof(HighCard);
 
-    public override int CompareHands(IList<Card> srcCards, IList<Card> targetCards)
+    protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
     {
       var firstResult = CompareCards(srcCards, targetCards, 0, 1, 2);
       if (firstResult != 0) return firstResult;
@@ -16,7 +16,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
       return srcCards.Count != targetCards.Count ? 0 : CompareCards(srcCards, targetCards, 3, 4);
     }
 
-    public override int GetStrength(IList<Card> orderedCards)
+    protected override int GetStrength(IList<Card> orderedCards)
     {
       return GetCardsStrength(Pad2Cards(orderedCards, orderedCards.Take(3).ToArray()).ToArray());
     }

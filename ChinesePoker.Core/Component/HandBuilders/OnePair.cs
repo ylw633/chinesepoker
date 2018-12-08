@@ -9,12 +9,12 @@ namespace ChinesePoker.Core.Component.HandBuilders
   {
     public override string HandName => nameof(OnePair);
 
-    public override int GetStrength(IList<Card> orderedCards)
+    protected override int GetStrength(IList<Card> orderedCards)
     {
       return GetCardsStrength(Pad2Cards(orderedCards, orderedCards[0], orderedCards[2]).ToArray());
     }
 
-    public override int CompareHands(IList<Card> srcCards, IList<Card> targetCards)
+    protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
     {
       var firstResult = CompareCards(srcCards, targetCards, 0, 2);
       if (firstResult != 0) return firstResult;
@@ -22,7 +22,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
       return srcCards.Count != targetCards.Count ? 0 : CompareCards(srcCards, targetCards, 3, 4);
     }
 
-    public override IList<Card> SortCards(IList<Card> cards)
+    protected override IList<Card> SortCards(IList<Card> cards)
     {
       var rankGroup = cards.GroupBy(c => c.Rank).OrderByDescending(g => g.Count()).ThenByDescending(g => g.First().Ordinal).ToList();
       var orderedCards = rankGroup[0].OrderBy(c => c.RankingAsc).Concat(rankGroup.Skip(1).SelectMany(g => g).OrderBy(c => c.RankingAsc)).ToList();

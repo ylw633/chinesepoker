@@ -16,10 +16,9 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correctly_identify_a_full_house()
     {
       var cards = Dealer.GetCards("33,25,35,43,23");
-      var hand = new FullHouse().GetAHand(cards);
+      var hand = cards.GetHand<FullHouse>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.FullHouse, hand.HandType);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "23,33,43,25,35");
+      hand.Cards.TestCardsAreInOrder("23,33,43,25,35");
     }
   }
 }

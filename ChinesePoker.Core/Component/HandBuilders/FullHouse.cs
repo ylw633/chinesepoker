@@ -9,7 +9,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
   {
     public override string HandName => nameof(FullHouse);
 
-    public override IList<Card> SortCards(IList<Card> cards)
+    protected override IList<Card> SortCards(IList<Card> cards)
     {
       var rankGroup = cards.GroupBy(c => c.Rank).OrderByDescending(g => g.Count()).ThenByDescending(g => g.First().Ordinal).ToList();
       var orderedCards = rankGroup[0].OrderBy(c => c.RankingAsc).Concat(rankGroup[1].OrderBy(c => c.RankingAsc)).ToList();

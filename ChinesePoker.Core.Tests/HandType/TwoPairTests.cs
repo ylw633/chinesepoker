@@ -16,9 +16,8 @@ namespace ChinesePoker.Core.Tests.HandType
     public void two_pair_is_recognized_and_sorted_and_give_correct_strength()
     {
       var cards = Dealer.GetCards("S7,H8,C10,C8,D7");
-      var hand = new TwoPair().GetAHand(cards);
+      var hand = cards.GetHand<TwoPair>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.TwoPair, hand.HandType);
       Assert.Equal(new Card("H8"), hand.Cards[0]);
       Assert.Equal(new Card("C8"), hand.Cards[1]);
       Assert.Equal(new Card("S7"), hand.Cards[2]);
@@ -26,9 +25,8 @@ namespace ChinesePoker.Core.Tests.HandType
       Assert.Equal(new Card("C10"), hand.Cards[4]);
 
       cards = Dealer.GetCards("3K,23,43,1K,27");
-      hand = new TwoPair().GetAHand(cards);
+      hand = cards.GetHand<TwoPair>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.TwoPair, hand.HandType);
       Assert.Equal(new Card("1K"), hand.Cards[0]);
       Assert.Equal(new Card("3K"), hand.Cards[1]);
       Assert.Equal(new Card("23"), hand.Cards[2]);

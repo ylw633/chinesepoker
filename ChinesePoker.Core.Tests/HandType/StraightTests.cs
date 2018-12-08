@@ -17,23 +17,22 @@ namespace ChinesePoker.Core.Tests.HandType
     public void standard_straight_is_correctly_identified_and_ordered()
     {
       var cards = Dealer.GetCards("11,25,32,44,33");
-      var straight = new Straight();
-      var hand = straight.GetAHand(cards);
+      var hand = cards.GetHand<Straight>();
       Assert.NotNull(hand);
-      Assert.Equal(Hand.GetHandTypeBaseStrength(HandTypes.Straight) + 9, hand.Strength);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "11,25,44,33,32");
+      Assert.Equal(3, hand.Strength);
+      hand.Cards.TestCardsAreInOrder("11,32,33,44,25");
 
       cards = Dealer.GetCards("21,313,410,111,412");
-      hand = straight.GetAHand(cards);
+      hand = cards.GetHand<Straight>();
       Assert.NotNull(hand);
-      Assert.Equal(Hand.GetHandTypeBaseStrength(HandTypes.Straight) + 10, hand.Strength);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "21,313,412,111,410");
+      Assert.Equal(12, hand.Strength);
+      hand.Cards.TestCardsAreInOrder("410,111,412,313,21");
 
       cards = Dealer.GetCards("36,24,15,22,43");
-      hand = straight.GetAHand(cards);
+      hand = cards.GetHand<Straight>();
       Assert.NotNull(hand);
-      Assert.Equal(Hand.GetHandTypeBaseStrength(HandTypes.Straight), hand.Strength);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "36,15,24,43,22");
+      Assert.Equal(4, hand.Strength);
+      hand.Cards.TestCardsAreInOrder("22,43,24,15,36");
     }
   }
 }

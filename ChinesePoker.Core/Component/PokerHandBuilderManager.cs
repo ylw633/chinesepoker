@@ -105,18 +105,17 @@ namespace ChinesePoker.Core.Component
 
       // get possible testers according to card count
       var testers = _handTypeTesters[cardList.Count];
-      for (var i = 0; i < testers.Count; i++)
+      foreach (var bd in testers)
       {
-        var bd = testers[i];
-        var handBuilder = bd.HandBuilder;
-        if (!handBuilder.TestIsHand(cardList)) continue;
-
         if (bd.BaseStrength >= maxHand?.Strength) continue;
 
-        var orderedCards = handBuilder.SortCards(cardList);
-        if (maxHand != null && bd.HandBuilder.HandName == maxHand.Name && handBuilder.CompareHands(orderedCards, maxHand.Cards) > 0) continue;
+        var handBuilder = bd.HandBuilder;
+        var hand = handBuilder.GetHand(cardList, bd.BaseStrength);
+
+        if (hand == null) continue;
+        if (maxHand != null && bd.HandBuilder.HandName == maxHand.Name && handBuilder.CompareHands(hand, maxHand) > 0) continue;
         
-        return new Hand(handBuilder.HandName, orderedCards, bd.BaseStrength + handBuilder.GetStrength(orderedCards));
+        return hand;
       }
 
       return null;

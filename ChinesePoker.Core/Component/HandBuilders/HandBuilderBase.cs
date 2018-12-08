@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
@@ -9,24 +10,39 @@ namespace ChinesePoker.Core.Component.HandBuilders
   {
     public abstract string HandName { get; }
 
-    public virtual int GetStrength(IList<Card> orderedCards)
+    protected virtual int GetStrength(IList<Card> orderedCards)
     {
       return GetCardStrength(orderedCards[0]);
     }
 
-    public virtual int CompareHands(IList<Card> srcCards, IList<Card> targetCards)
+    public int CompareHands(Hand srcHand, Hand targetHand)
     {
-      return CompareCards(srcCards, targetCards, 0);
+      if (srcHand == null || targetHand == null || srcHand.Name != targetHand.Name)
+        throw new ArgumentException($"Cannot compare two different kinds of hands: {srcHand?.Name ?? "null"} and {targetHand?.Name ?? "null"}");
+
+      return CompareCards(srcHand.Cards, targetHand.Cards);
     }
 
-    public static int CompareCards(IList<Card> srcCards, IList<Card> targetCards, params int[] cmpCrdIdx)
+    protected virtual int CompareCards(IList<Card> srcCards, IList<Card> targetCard)
+    {
+      return CompareCards(srcCards, targetCard, 0);
+    }
+
+    protected static int CompareCards(IList<Card> srcCards, IList<Card> targetCards, params int[] cmpCrdIdx)
     {
       return cmpCrdIdx.Select(i => GetCardStrength(srcCards[i]).CompareTo(GetCardStrength(targetCards[i]))).FirstOrDefault(c => c != 0);
     }
 
-    public virtual IList<Card> SortCards(IList<Card> cards)
+    protected virtual IList<Card> SortCards(IList<Card> cards)
     {
       return cards.OrderBy(c => c.RankingAsc).ToList();
+    }
+
+    public Hand GetHand(IList<Card> cards, int handStrengthOffset = 0)
+    {
+      if (!TestIsHand(cards)) return null;
+      var orderedCards = SortCards(cards);
+      return new Hand(HandName, orderedCards, GetStrength(orderedCards) + handStrengthOffset);
     }
 
     public abstract bool TestIsHand(IList<Card> cards);

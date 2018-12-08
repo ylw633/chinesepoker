@@ -9,6 +9,6 @@ namespace ChinesePoker.Core.Interface
 {
   public interface IScoreCalculator
   {
-    void GetScore(Round roundA, Round roundB, out int scoreA, out int socreB);
+    void GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB);
   }
 }

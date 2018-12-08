@@ -16,10 +16,9 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correcty_identify_flush()
     {
       var cards = Dealer.GetCards("47,48,4K,410,42");
-      var hand = new Flush().GetAHand(cards);
+      var hand = new Flush().GetHand(cards);
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.Flush, hand.HandType);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "4K,410,48,47,42");
+      hand.Cards.TestCardsAreInOrder("4K,410,48,47,42");
     }
   }
 }

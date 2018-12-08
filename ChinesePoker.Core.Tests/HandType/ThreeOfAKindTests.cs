@@ -16,27 +16,25 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correctly_identify_with_5_cards()
     {
       var cards = Dealer.GetCards("H2,C8,S5,S8,D8");
-      var hand = new ThreeOfAKind().GetAHand(cards);
+      var hand = cards.GetHand<ThreeOfAKind>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.ThreeOfAKind, hand.HandType);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "S8,D8,C8,S5,H2");
+      hand.Cards.TestCardsAreInOrder("S8,D8,C8,S5,H2");
     }
 
     [Fact]
     public void should_correctly_identify_with_3_cards()
     {
       var cards = Dealer.GetCards("17,27,37");
-      var hand = new ThreeOfAKind().GetAHand(cards);
+      var hand = cards.GetHand<ThreeOfAKind>();
       Assert.NotNull(hand);
-      Assert.Equal(HandTypes.ThreeOfAKind, hand.HandType);
-      TestUtils.TestCardsAreInOrder(hand.Cards, "17,27,37");
+      hand.Cards.TestCardsAreInOrder("17,27,37");
     }
 
     [Fact]
     public void dont_mistaken_full_house_with_three_of_a_kind()
     {
       var cards = Dealer.GetCards("210,310,113,413,313");
-      var hand = new ThreeOfAKind().GetAHand(cards);
+      var hand = cards.GetHand<ThreeOfAKind>();
       Assert.Null(hand);
     }
   }

@@ -11,17 +11,17 @@ namespace ChinesePoker.Core.Component.HandBuilders
 
     public override string HandName => nameof(Straight);
 
-    public override int CompareHands(IList<Card> srcCards, IList<Card> targetCards)
+    protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
     {
       return CompareCards(srcCards, targetCards, 4);
     }
 
-    public override int GetStrength(IList<Card> orderedCards)
+    protected override int GetStrength(IList<Card> orderedCards)
     {
       return GetCardStrength(orderedCards[4]);
     }
 
-    public override IList<Card> SortCards(IList<Card> cards)
+    protected override IList<Card> SortCards(IList<Card> cards)
     {
       var sortedCards = cards.OrderBy(c => c.Ordinal).ToList();
       var cardRank = new string(sortedCards.Select(c => c.Rank).ToArray());
