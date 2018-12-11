@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChinesePoker.Core", "ChinesePoker.Core\ChinesePoker.Core.csproj", "{700E80AD-DB69-4992-8355-64222AA93566}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChinesePoker.Core.Tests", "ChinesePoker.Core.Tests\ChinesePoker.Core.Tests.csproj", "{1B95C9F3-1913-4CE9-B8CC-F83907421C69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChinesePoker.ML", "ChinesePoker.ML\ChinesePoker.ML.csproj", "{A49CD57D-A79F-4B9F-B6F8-B930677BBAF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,15 @@ Global
 		{1B95C9F3-1913-4CE9-B8CC-F83907421C69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B95C9F3-1913-4CE9-B8CC-F83907421C69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B95C9F3-1913-4CE9-B8CC-F83907421C69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49CD57D-A79F-4B9F-B6F8-B930677BBAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49CD57D-A79F-4B9F-B6F8-B930677BBAF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49CD57D-A79F-4B9F-B6F8-B930677BBAF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49CD57D-A79F-4B9F-B6F8-B930677BBAF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9135D528-751A-4B59-8910-91DA8DBE8AC5}
 	EndGlobalSection
 EndGlobal

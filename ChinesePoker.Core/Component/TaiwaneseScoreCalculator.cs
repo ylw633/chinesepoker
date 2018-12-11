@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ChinesePoker.Core.Component.HandBuilders;
 using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
+using Combinatorics.Collections;
 
 namespace ChinesePoker.Core.Component
 {
@@ -17,30 +18,52 @@ namespace ChinesePoker.Core.Component
     public int FourOfKindInLastRoundBonus { get; set; } = 2;
     public int StraightFlushInMiddleRoundBonus { get; set; } = 4;
     public int StraightFlushInLastRoundBonus { get; set; } = 3;
-    public int DragonBonus { get; set; } = 108;
+    public int DragonBonus { get; set; } = 36;
     public void GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
     {
       scoreA = scoreB = 0;
 
       var pts = 0;
-      for (int i = 0; i < 3; i++)
-      {
-        pts += roundA.Hands[i].Strength.CompareTo(roundB.Hands[i].Strength);
-      }
 
-      if (pts == 3)
+      if (roundA.Hands.Count == 1)
+        pts += DragonBonus;
+      if (roundB.Hands.Count == 1)
+        pts -= DragonBonus;
+      else
       {
-        pts += StrikeBonus;
-      }
-      else if (pts == -3)
-      {
-        pts -= StrikeBonus;
-      }
+        for (int i = 0; i < 3; i++)
+        {
+          pts += roundA.Hands[i].Strength.CompareTo(roundB.Hands[i].Strength);
+        }
 
-      pts += SpecialHandBonus(roundA) - SpecialHandBonus(roundB);
+        if (pts == 3)
+        {
+          pts += StrikeBonus;
+        }
+        else if (pts == -3)
+        {
+          pts -= StrikeBonus;
+        }
+
+        pts += SpecialHandBonus(roundA) - SpecialHandBonus(roundB);
+        
+      }
 
       scoreA += pts;
       scoreB -= pts;
+    }
+
+    public Dictionary<Round, int> GetScore(IList<Round> rounds)
+    {
+      var result = rounds.ToDictionary(r => r, r => 0);
+      foreach (var match in new Combinations<Round>(rounds.ToList(), 2, GenerateOption.WithoutRepetition))
+      {
+        GetScore(match[0], match[1], out var scoreA, out var scoreB);
+        result[match[0]] += scoreA;
+        result[match[1]] += scoreB;
+      }
+
+      return result;
     }
 
     protected int SpecialHandBonus(Round round)

@@ -23,5 +23,10 @@ namespace ChinesePoker.Core.Component
     {
       return GetPossibleRounds(cards).OrderByDescending(r => r.TotalStrength).First();
     }
+
+    public IEnumerable<Round> GetBestRounds(IList<Card> cards, int take)
+    {
+      return GetPossibleRounds(cards).OrderByDescending(r => r.TotalStrength).Take(take);
+    }
   }
 }
