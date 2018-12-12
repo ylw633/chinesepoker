@@ -14,9 +14,9 @@ namespace ChinesePoker.ML
 
     static void Main(string[] args)
     {
-      GenerateData();
+      //GenerateData();
       //Train();
-      //Prediction();
+      Prediction();
     }
 
     static void GenerateData()
@@ -34,7 +34,7 @@ namespace ChinesePoker.ML
     static void Prediction()
     {
       var predictor = new Predictor();
-      predictor.Go(TrainedModelPath);
+      predictor.SimulationComparison(TrainedModelPath);
     }
   }
 }

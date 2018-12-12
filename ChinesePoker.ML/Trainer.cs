@@ -17,13 +17,14 @@ namespace ChinesePoker.ML
       public int FirstHandStrength { get; set; }
       public int MiddleHandStrength { get; set; }
       public int LastHandStrength { get; set; }
-      public float Score { get; set; }
+      public int Score { get; set; }
     }
 
     public class RoundStrengthPrediction
     {
-      [Column(nameof(RoundData.Score))]
-      public float Score { get; set; }
+      public int PredictedLabel { get; set; }
+      //public float Probability { get; set; }
+      public float[] Score { get; set; }
     }
 
     public void Go(string dataFileName, string modelPath)
@@ -35,38 +36,39 @@ namespace ChinesePoker.ML
         HasHeader = false,
         Column = new[]
         {
-          new TextLoader.Column(nameof(RoundData.FirstHandStrength), DataKind.R4, 0),
-          new TextLoader.Column(nameof(RoundData.MiddleHandStrength), DataKind.R4, 1),
-          new TextLoader.Column(nameof(RoundData.LastHandStrength), DataKind.R4, 2),
-          new TextLoader.Column(nameof(RoundData.Score), DataKind.R4, 3),
+          new TextLoader.Column(nameof(RoundData.FirstHandStrength), DataKind.I4, 0),
+          new TextLoader.Column(nameof(RoundData.MiddleHandStrength), DataKind.I4, 1),
+          new TextLoader.Column(nameof(RoundData.LastHandStrength), DataKind.I4, 2),
+          new TextLoader.Column(nameof(RoundData.Score), DataKind.I4, 3),
         }
       });
 
       var dataView = reader.Read(dataFileName);
-      var pipeline = mlContext.Transforms.CopyColumns(nameof(RoundData.Score), "Label")
-        //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
-        //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
-        //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Transforms.Concatenate("Features",
-          nameof(RoundData.FirstHandStrength),
-          nameof(RoundData.MiddleHandStrength),
-          nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Regression.Trainers.FastForest());
-      //var pipeline = mlContext.Transforms.Conversion.MapValueToKey(nameof(RoundData.Score), "Label")
-      //  .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
-      //  .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
-      //  .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
+      //var pipeline = mlContext.Transforms.CopyColumns(nameof(RoundData.Score), "Label")
+      //  //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
+      //  //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
+      //  //.Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
       //  .Append(mlContext.Transforms.Concatenate("Features",
       //    nameof(RoundData.FirstHandStrength),
       //    nameof(RoundData.MiddleHandStrength),
       //    nameof(RoundData.LastHandStrength)))
-      //  .AppendCacheCheckpoint(mlContext)
-      //  .Append(mlContext.Transforms.Conversion.MapKeyToValue())
-      //  .Append(mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent());
+      //  .Append(mlContext.Regression.Trainers.FastForest());
+      var pipeline = mlContext.Transforms.Conversion.MapValueToKey(nameof(RoundData.Score), "Label")
+        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
+        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
+        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
+        .Append(mlContext.Transforms.Concatenate("Features",
+          nameof(RoundData.FirstHandStrength),
+          nameof(RoundData.MiddleHandStrength),
+          nameof(RoundData.LastHandStrength)))
+        .AppendCacheCheckpoint(mlContext)
+        .Append(mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent())
+        .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+        //.Append(mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent());
 
 
-      //var preview = dataView.Preview();
-      //var transPreview = pipeline.Preview(dataView);
+      var preview = dataView.Preview();
+      var transPreview = pipeline.Preview(dataView);
       var model = pipeline.Fit(dataView);
 
       using (var sw = new FileStream(modelPath, FileMode.Create, FileAccess.Write, FileShare.Write))

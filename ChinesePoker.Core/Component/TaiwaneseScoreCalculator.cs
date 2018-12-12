@@ -27,7 +27,7 @@ namespace ChinesePoker.Core.Component
 
       if (roundA.Hands.Count == 1)
         pts += DragonBonus;
-      if (roundB.Hands.Count == 1)
+      else if (roundB.Hands.Count == 1)
         pts -= DragonBonus;
       else
       {

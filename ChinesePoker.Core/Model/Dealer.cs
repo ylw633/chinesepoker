@@ -24,13 +24,13 @@ namespace ChinesePoker.Core.Model
       return cardTxt.Split(',', ' ').Select(s => new Card(s)).ToList();
     }
 
-    public static IEnumerable<IEnumerable<Card>> Deal()
+    public static IEnumerable<IList<Card>> Deal()
     {
       var rnd = new Random();
-      return FullDeck.OrderBy(c => rnd.Next()).Chunk(13);
+      return FullDeck.OrderBy(c => rnd.Next()).Chunk(13).Select(c => c.ToList());
     }
 
-    public static IEnumerable<Card> DealOneSet()
+    public static IList<Card> DealOneSet()
     {
       return Deal().First();
     }

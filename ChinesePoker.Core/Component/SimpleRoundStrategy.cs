@@ -21,10 +21,10 @@ namespace ChinesePoker.Core.Component
     }
     public Round GetBestRound(IList<Card> cards)
     {
-      return GetPossibleRounds(cards).OrderByDescending(r => r.TotalStrength).First();
+      return GetBestRounds(cards).First();
     }
 
-    public IEnumerable<Round> GetBestRounds(IList<Card> cards, int take)
+    public IEnumerable<Round> GetBestRounds(IList<Card> cards, int take = 1)
     {
       return GetPossibleRounds(cards).OrderByDescending(r => r.TotalStrength).Take(take);
     }

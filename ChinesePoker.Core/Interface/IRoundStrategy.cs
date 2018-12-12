@@ -10,6 +10,6 @@ namespace ChinesePoker.Core.Interface
   interface IRoundStrategy
   {
     IEnumerable<Round> GetPossibleRounds(IList<Card> cards);
-    Round GetBestRound(IList<Card> cards);
+    IEnumerable<Round> GetBestRounds(IList<Card> cards, int take);
   }
 }

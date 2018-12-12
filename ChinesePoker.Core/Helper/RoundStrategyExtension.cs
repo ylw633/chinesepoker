@@ -9,9 +9,9 @@ using Combinatorics.Collections;
 
 namespace ChinesePoker.Core.Helper
 {
-  public class RoundStrategyExtension
+  public static class RoundStrategyExtension
   {
-    public static IEnumerable<Round> GetAllPossibleRounds(IGameHandsManager handsManager, IList<Card> cards)
+    public static IEnumerable<Round> GetAllPossibleRounds(this IGameHandsManager handsManager, IList<Card> cards)
     {
       if (cards.Count != 13) throw new Exception("not enough cards");
       var hand = handsManager.DetermineHand(cards); // if it's a dragon
