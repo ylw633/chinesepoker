@@ -22,4 +22,15 @@ namespace ChinesePoker.Core.Model
       return $"{TotalStrength}\n{string.Join("\n", Hands)}";
     }
   }
+
+  #region for machine learning
+  public class RoundData
+  {
+    public int FirstHandStrength { get; set; }
+    public int MiddleHandStrength { get; set; }
+    public int LastHandStrength { get; set; }
+    public int Score { get; set; }
+  }
+  #endregion
+
 }

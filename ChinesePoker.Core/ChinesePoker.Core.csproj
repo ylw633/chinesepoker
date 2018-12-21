@@ -120,7 +120,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Component\MachineLearningStrategy.cs" />
+    <Compile Include="Component\CategorizationMlStrategy.cs" />
+    <Compile Include="Component\RegressionMlStrategy.cs" />
     <Compile Include="Component\SimpleRoundStrategy.cs" />
     <Compile Include="Component\PokerHandBuilderManager.cs" />
     <Compile Include="Component\TaiwaneseScoreCalculator.cs" />

@@ -28,13 +28,15 @@ namespace ChinesePoker.ML
     static void Train()
     {
       var trainer = new Trainer();
-      trainer.Go(RawDataPath, TrainedModelPath);
+      //trainer.RegressionTraining(RawDataPath, TrainedModelPath);
+      trainer.CategorizationTraining(RawDataPath, TrainedModelPath);
     }
 
     static void Prediction()
     {
       var predictor = new Predictor();
       predictor.SimulationComparison(TrainedModelPath);
+      //predictor.Go(TrainedModelPath);
     }
   }
 }

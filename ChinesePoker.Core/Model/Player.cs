@@ -11,12 +11,11 @@ namespace ChinesePoker.Core.Model
   public class Player
   {
     public IList<Card> Cards { get; set; }
+    public int Score { get; set; }
 
     public Player(IList<Card> cards)
     {
       Cards = cards;
     }
-
-
   }
 }

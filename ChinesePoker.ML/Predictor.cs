@@ -14,41 +14,39 @@ namespace ChinesePoker.ML
 {
   public class Predictor
   {
+    public class CategorizationPredictionData
+    {
+      public int PredictedLabel { get; set; }
+      //public float Probability { get; set; }
+    }
+
+    public class RegressionPredictionData
+    {
+      public float Score { get; set; }
+    }
+
     public void Go(string modelPath)
     {
-      var sets = Dealer.Deal().ToList();
-      var player = new SimpleRoundStrategy();
-
-      var mlContext = new MLContext();
-      ITransformer model;
-      using (var sr = File.OpenRead(modelPath))
-        model = mlContext.Model.Load(sr);
-
-      var calc = model.MakePredictionFunction<Trainer.RoundData, Trainer.RoundStrengthPrediction>(mlContext);
-
-      var predict = player.GetBestRounds(sets[0].ToList(), 7).Select(r => new
+      string line;
+      do
       {
-        Round = r,
-        Prediction = calc.Predict(new Trainer.RoundData
+        var sets = Dealer.Deal().ToList();
+        var player = new CategorizationMlStrategy(modelPath);
+        //var player = new RegressionMlStrategy(modelPath);
+
+        foreach (var round in player.GetBestRoundsWithScore(sets[0], 10))
         {
-          FirstHandStrength = r.Hands[0].Strength,
-          MiddleHandStrength = r.Hands[0].Strength,
-          LastHandStrength = r.Hands[0].Strength
-        }).PredictedLabel
-      }).ToList();
+          Console.WriteLine($"{round.Key}\n{round.Value}\n");
+        }
 
-
-      foreach (var round in predict.OrderByDescending(p => p.Prediction))
-      {
-        Console.WriteLine($"{round.Round}\n{round.Prediction}");
-      }
-
-      Console.ReadLine();
+        line = Console.ReadLine();
+        Console.Clear();
+      } while (line != "q");
     }
 
     public void Simulation(string modelPath)
     {
-      var mlStrategy = new MachineLearningStrategy(modelPath);
+      var mlStrategy = new RegressionMlStrategy(modelPath);
       var simpleStrategy = new SimpleRoundStrategy();
       var scoreKeeper = new TaiwaneseScoreCalculator();
 
@@ -87,7 +85,7 @@ namespace ChinesePoker.ML
 
     public void SimulationComparison(string modelPath)
     {
-      var mlStrategy = new MachineLearningStrategy(modelPath);
+      var mlStrategy = new CategorizationMlStrategy(modelPath);
       var simpleStrategy = new SimpleRoundStrategy();
       var scoreKeeper = new TaiwaneseScoreCalculator();
 

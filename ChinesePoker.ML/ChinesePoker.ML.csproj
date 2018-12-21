@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleHelper.cs" />
     <Compile Include="PlayRecordGenerator.cs" />
     <Compile Include="Predictor.cs" />
     <Compile Include="Program.cs" />
