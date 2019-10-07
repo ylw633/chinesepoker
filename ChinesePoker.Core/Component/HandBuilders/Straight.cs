@@ -11,15 +11,15 @@ namespace ChinesePoker.Core.Component.HandBuilders
 
     public override string HandName => nameof(Straight);
 
-    protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
-    {
-      return CompareCards(srcCards, targetCards, 4);
-    }
+    //protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
+    //{
+    //  return CompareCards(srcCards, targetCards, 4);
+    //}
 
-    protected override int GetStrength(IList<Card> orderedCards)
-    {
-      return GetCardStrength(orderedCards[4]);
-    }
+    //protected override int GetStrength(IList<Card> orderedCards)
+    //{
+    //  return GetCardStrength(orderedCards[4]);
+    //}
 
     protected override IList<Card> SortCards(IList<Card> cards)
     {
@@ -41,6 +41,16 @@ namespace ChinesePoker.Core.Component.HandBuilders
 
       var cardRank = new string(cards.OrderBy(c => c.Ordinal).Select(c => c.Rank).ToArray());
       return _possibleForm.Any(form => form.IndexOf(cardRank, StringComparison.OrdinalIgnoreCase) > -1);
+    }
+
+    public override IEnumerable<string> GetAllPossibleComboSorted()
+    {
+      for (int j = 1; j < 10; j++)
+      {
+        yield return $"{Card.OrdinalToRank(j)}{Card.OrdinalToRank(j + 1)}{Card.OrdinalToRank(j + 2)}{Card.OrdinalToRank(j + 3)}{Card.OrdinalToRank(j + 4)}";
+      }
+
+      yield return $"{Card.OrdinalToRank(10)}{Card.OrdinalToRank(11)}{Card.OrdinalToRank(12)}{Card.OrdinalToRank(13)}{Card.OrdinalToRank(1)}";
     }
   }
 }

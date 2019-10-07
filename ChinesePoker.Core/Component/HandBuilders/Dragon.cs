@@ -19,5 +19,10 @@ namespace ChinesePoker.Core.Component.HandBuilders
 
       return cardRank == ordinal;
     }
+
+    public override IEnumerable<string> GetAllPossibleComboSorted()
+    {
+      yield return "A23456789TJQK";
+    }
   }
 }

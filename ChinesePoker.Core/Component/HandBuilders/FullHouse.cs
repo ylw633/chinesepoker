@@ -5,16 +5,16 @@ using ChinesePoker.Core.Model;
 
 namespace ChinesePoker.Core.Component.HandBuilders
 {
-  public class FullHouse : HandBuilderBase
+  public class FullHouse : ThreeOfAKind
   {
     public override string HandName => nameof(FullHouse);
 
-    protected override IList<Card> SortCards(IList<Card> cards)
-    {
-      var rankGroup = cards.GroupBy(c => c.Rank).OrderByDescending(g => g.Count()).ThenByDescending(g => g.First().Ordinal).ToList();
-      var orderedCards = rankGroup[0].OrderBy(c => c.RankingAsc).Concat(rankGroup[1].OrderBy(c => c.RankingAsc)).ToList();
-      return orderedCards;
-    }
+    //protected override IList<Card> SortCards(IList<Card> cards)
+    //{
+    //  var rankGroup = cards.GroupBy(c => c.Rank).OrderByDescending(g => g.Count()).ThenByDescending(g => g.First().Ordinal).ToList();
+    //  var orderedCards = rankGroup[0].OrderBy(c => c.RankingAsc).Concat(rankGroup[1].OrderBy(c => c.RankingAsc)).ToList();
+    //  return orderedCards;
+    //}
 
     public override bool TestIsHand(IList<Card> cards)
     {

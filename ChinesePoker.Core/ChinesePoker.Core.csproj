@@ -131,6 +131,7 @@
     <Compile Include="Interface\IHandBuilder.cs" />
     <Compile Include="Interface\IRoundStrategy.cs" />
     <Compile Include="Interface\IScoreCalculator.cs" />
+    <Compile Include="Interface\IStrengthStrategy.cs" />
     <Compile Include="Model\Card.cs" />
     <Compile Include="Model\Dealer.cs" />
     <Compile Include="Model\Hand.cs" />
@@ -150,6 +151,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\TrainedData\model-cateegorzation-lr.zip">
+      <Link>Data\model-cateegorzation-lr.zip</Link>
+    </None>
     <None Include="..\TrainedData\model-categorization.zip">
       <Link>Data\model-categorization.zip</Link>
     </None>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,84 +24,28 @@ namespace ChinesePoker.Core.Model
 
     public SuitTypes Suit
     {
-      get { return _suit; }
+      get => _suit;
       private set
       {
         _suit = value;
-        CalibrateRanking();
       }
     }
 
     private char _rank;
     public char Rank
     {
-      get { return _rank; }
+      get => _rank;
       private set
       {
         var rank = char.ToUpper(value);
         if (!VALID_RANKS.Contains(rank)) throw new Exception($"Invalid rank: {rank}");
 
         _rank = rank;
-        CalibrateRanking();
-
-        switch (rank)
-        {
-          case 'A':
-            Ordinal = 1;
-            break;
-          case 'K':
-            Ordinal = 13;
-            break;
-          case 'Q':
-            Ordinal = 12;
-            break;
-          case 'J':
-            Ordinal = 11;
-            break;
-          case 'T':
-            Ordinal = 10;
-            break;
-          default:
-            Ordinal = int.Parse(Rank.ToString());
-            break;
-        }
+        Ordinal = OrdinalToRank(rank);
       }
     }
 
     public int Ordinal { get; private set; }
-
-    private void CalibrateRanking()
-    {
-      if (!VALID_RANKS.Contains(Rank)) return;
-
-      int rankVal = 0;
-      switch (Rank)
-      {
-        case 'A':
-          rankVal = 0;
-          break;
-        case 'K':
-          rankVal = 1;
-          break;
-        case 'Q':
-          rankVal = 2;
-          break;
-        case 'J':
-          rankVal = 3;
-          break;
-        case 'T':
-          rankVal = 4;
-          break;
-        default:
-          rankVal = 14 - int.Parse(Rank.ToString());
-          break;
-      }
-
-      RankingAsc = rankVal * 4 + (int) Suit;
-    }
-
-    public int RankingAsc { get; private set; }
-    public int RankingDsc => 53 - RankingAsc;
 
     public Card(SuitTypes suit, char rank)
     {
@@ -116,6 +61,38 @@ namespace ChinesePoker.Core.Model
     public Card(string cardText)
     {
       ParseCardText(cardText);
+    }
+
+    public static char OrdinalToRank(int carNum)
+    {
+      if (carNum < 1 || carNum > 13) throw new ArgumentException("Invalid input", nameof(carNum));
+
+      switch (carNum)
+      {
+        case 1: return 'A';
+        case 10: return 'T';
+        case 11: return 'J';
+        case 12: return 'Q';
+        case 13: return 'K';
+        default:
+          return (char)('0' + carNum);
+      }
+    }
+
+    public static int RankToOrdinal(char rank)
+    {
+      rank = char.ToUpper(rank);
+      if (!VALID_RANKS.Contains(rank)) throw new Exception($"Invalid rank: {rank}");
+
+      switch (rank)
+      {
+        case 'A': return 1;
+        case 'K': return 13;
+        case 'Q': return 12;
+        case 'J': return 11;
+        case 'T': return 10;
+        default: return int.Parse(rank.ToString());
+      }
     }
 
     private void ParseCardText(string cardText)
@@ -171,13 +148,23 @@ namespace ChinesePoker.Core.Model
 
     public override bool Equals(object obj)
     {
-      var otherCard = obj as Card;
-      return otherCard != null && this.Suit == otherCard.Suit && this.Rank == otherCard.Rank;
+      return obj is Card otherCard && this.Suit == otherCard.Suit && this.Rank == otherCard.Rank;
+    }
+
+    protected bool Equals(Card other)
+    {
+      return _suit == other._suit && _rank == other._rank && Ordinal == other.Ordinal;
     }
 
     public override int GetHashCode()
     {
-      return this.RankingAsc;
+      unchecked
+      {
+        var hashCode = (int) _suit;
+        hashCode = (hashCode * 397) ^ _rank.GetHashCode();
+        hashCode = (hashCode * 397) ^ Ordinal;
+        return hashCode;
+      }
     }
 
     public override string ToString()

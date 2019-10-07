@@ -6,7 +6,7 @@ using ChinesePoker.Core.Model;
 
 namespace ChinesePoker.Core.Component.HandBuilders
 {
-  public class Flush : HandBuilderBase
+  public class Flush : HighCard
   {
     public override string HandName => nameof(Flush);
 
@@ -18,14 +18,14 @@ namespace ChinesePoker.Core.Component.HandBuilders
       return cards.Skip(1).All(c => c.Suit == firstSuit);
     }
 
-    protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
-    {
-      return CompareCards(srcCards, targetCards, 0, 1, 2, 3, 4);
-    }
+    //protected override int CompareCards(IList<Card> srcCards, IList<Card> targetCards)
+    //{
+    //  return CompareCards(srcCards, targetCards, 0, 1, 2, 3, 4);
+    //}
 
-    protected override int GetStrength(IList<Card> orderedCards)
-    {
-      return GetCardsStrength(orderedCards.ToArray());
-    }
+    //protected override int GetStrength(IList<Card> orderedCards)
+    //{
+    //  return GetCardsStrength(orderedCards.ToArray());
+    //}
   }
 }
