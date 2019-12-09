@@ -17,21 +17,17 @@ namespace ChinesePoker.Core.Tests.HandType
     public void standard_straight_is_correctly_identified_and_ordered()
     {
       var cards = Dealer.GetCards("11,25,32,44,33");
-      var hand = cards.GetHand<Straight>();
+      var hand = cards.GetHand();
       Assert.NotNull(hand);
-      Assert.Equal(3, hand.Strength);
       hand.Cards.TestCardsAreInOrder("11,32,33,44,25");
 
       cards = Dealer.GetCards("21,313,410,111,412");
-      hand = cards.GetHand<Straight>();
+      hand = cards.GetHand();
       Assert.NotNull(hand);
-      Assert.Equal(12, hand.Strength);
-      hand.Cards.TestCardsAreInOrder("410,111,412,313,21");
 
       cards = Dealer.GetCards("36,24,15,22,43");
-      hand = cards.GetHand<Straight>();
+      hand = cards.GetHand();
       Assert.NotNull(hand);
-      Assert.Equal(4, hand.Strength);
       hand.Cards.TestCardsAreInOrder("22,43,24,15,36");
     }
   }

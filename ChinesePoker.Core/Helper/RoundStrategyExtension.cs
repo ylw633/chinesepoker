@@ -17,7 +17,7 @@ namespace ChinesePoker.Core.Helper
       var hand = handsManager.DetermineHand(cards); // if it's a dragon
       if (hand != null)
       {
-        yield return new Round(new List<Hand> { hand });
+        yield return new Round(new List<Hand> { hand }, handsManager.StrengthStrategy.ComputeHandsStrength(new List<Hand> { hand }));
         yield break;
       }
 
@@ -25,7 +25,7 @@ namespace ChinesePoker.Core.Helper
       foreach (var thirdRoundCards in new Combinations<Card>(cards, 5, GenerateOption.WithoutRepetition))
       {
         var thirdRound = handsManager.DetermineHand(thirdRoundCards);
-        if (thirdRound == null || thirdRound.Strength < handsManager.MinHandStrengthThreshold) continue; // no need to continue if 3rd round is lower than min threshold
+        if (thirdRound == null || thirdRound.Name == nameof(HandTypes.HighCard)) continue; // no need to continue if 3rd round is high cards
         var secondRoundSet = cards.Except(thirdRoundCards).ToList();
         foreach (var secondRoundCards in new Combinations<Card>(secondRoundSet, 5, GenerateOption.WithoutRepetition))
         {
@@ -37,11 +37,12 @@ namespace ChinesePoker.Core.Helper
           if (firstRound == null) continue;
 
           // ignore ones with same strength
-          var hashKey = thirdRound.Strength.ToString() + secondRound.Strength + firstRound.Strength;
+          var hashKey = $"{thirdRound.Strength}_{secondRound.Strength}_{firstRound.Strength})";
           if (hash.Contains(hashKey))
             continue;
           hash.Add(hashKey);
-          yield return new Round(new List<Hand> { firstRound, secondRound, thirdRound });
+          var hands = new List<Hand> {firstRound, secondRound, thirdRound};
+          yield return new Round(hands, handsManager.StrengthStrategy.ComputeHandsStrength(hands));
         }
       }
     }

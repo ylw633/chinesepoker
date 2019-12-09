@@ -7,15 +7,29 @@ using System.Threading.Tasks;
 
 namespace ChinesePoker.Core.Model
 {
+  public enum HandTypes
+  {
+    HighCard,
+    OnePair,
+    TwoPairs,
+    ThreeOfAKind,
+    Straight,
+    Flush,
+    FullHouse,
+    FourOfAKind,
+    StraightFlush,
+    Dragon
+  }
+
   public class Hand
   {
     public string Name { get; set; }
     public IList<Card> Cards { get; set; }
     public int Strength { get; set; }
 
-    public Hand(string name, IList<Card> cards, int innerStrength)
+    public Hand(string type, IList<Card> cards, int innerStrength)
     {
-      Name = name;
+      Name = type;
       Cards = cards;
       Strength = innerStrength;
     }

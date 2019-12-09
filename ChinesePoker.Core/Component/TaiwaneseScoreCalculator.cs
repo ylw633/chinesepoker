@@ -13,15 +13,17 @@ namespace ChinesePoker.Core.Component
   public class TaiwaneseScoreCalculator : IScoreCalculator
   {
     public int StrikeBonus { get; set; } = 3;
-    public int ThreeOfKindInFirstRoundBonus { get; set; } = 1;
-    public int FourOfKindInMiddleRoundBonus { get; set; } = 3;
-    public int FourOfKindInLastRoundBonus { get; set; } = 2;
-    public int StraightFlushInMiddleRoundBonus { get; set; } = 4;
-    public int StraightFlushInLastRoundBonus { get; set; } = 3;
+    public int ThreeOfKindInFirstRoundBonus { get; set; } = 3;
+    public int FourOfKindInMiddleRoundBonus { get; set; } = 0;
+    public int FourOfKindInLastRoundBonus { get; set; } = 4;
+    public int StraightFlushInMiddleRoundBonus { get; set; } = 5;
+    public int StraightFlushInLastRoundBonus { get; set; } = 5;
     public int DragonBonus { get; set; } = 36;
-    public void GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
+    public int HomeRunBonus { get; set; } = 6;
+    public int GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
     {
       scoreA = scoreB = 0;
+      var strike = 0;
 
       var pts = 0;
 
@@ -39,10 +41,12 @@ namespace ChinesePoker.Core.Component
         if (pts == 3)
         {
           pts += StrikeBonus;
+          strike = 1;
         }
         else if (pts == -3)
         {
           pts -= StrikeBonus;
+          strike = -1;
         }
 
         pts += SpecialHandBonus(roundA) - SpecialHandBonus(roundB);
@@ -51,30 +55,50 @@ namespace ChinesePoker.Core.Component
 
       scoreA += pts;
       scoreB -= pts;
+
+      return strike;
     }
 
-    public Dictionary<Round, int> GetScore(IList<Round> rounds)
+    private class PlayerScore
     {
-      var result = rounds.ToDictionary(r => r, r => 0);
+      public int Score { get; set; }
+      public int StrikeCount { get; set; }
+    }
+
+    public Dictionary<Round, int> GetScores(IList<Round> rounds)
+    {
+      //var result = rounds.ToDictionary<Round, (int score, int strike)>(r => (0, 0));
+      var result = rounds.ToDictionary(r => r, r => new PlayerScore());
       foreach (var match in new Combinations<Round>(rounds.ToList(), 2, GenerateOption.WithoutRepetition))
       {
-        GetScore(match[0], match[1], out var scoreA, out var scoreB);
-        result[match[0]] += scoreA;
-        result[match[1]] += scoreB;
+        var strike = GetScore(match[0], match[1], out var scoreA, out var scoreB);
+        result[match[0]].Score += scoreA;
+        result[match[0]].StrikeCount += strike;
+        result[match[1]].Score += scoreB;
+        result[match[0]].StrikeCount -= strike;
       }
 
-      return result;
+      // home run case
+      var slugger = result.FirstOrDefault(kv => kv.Value.StrikeCount == 3);
+      if (slugger.Value != null)
+      {
+        slugger.Value.Score += HomeRunBonus * 3;
+        foreach (var otherPlayer in result.Except(new [] {slugger}))
+          otherPlayer.Value.Score -= HomeRunBonus;
+      }
+
+      return result.ToDictionary(r => r.Key, r => r.Value.Score);
     }
 
     protected int SpecialHandBonus(Round round)
     {
       return new[]
       {
-        GetScore(0, nameof(ThreeOfAKind), ThreeOfKindInFirstRoundBonus),
-        GetScore(1, nameof(FourOfAKind), FourOfKindInMiddleRoundBonus),
-        GetScore(1, nameof(StraightFlush), StraightFlushInMiddleRoundBonus),
-        GetScore(2, nameof(FourOfAKind), FourOfKindInLastRoundBonus),
-        GetScore(2, nameof(StraightFlush), StraightFlushInLastRoundBonus),
+        GetScore(0, nameof(HandTypes.ThreeOfAKind), ThreeOfKindInFirstRoundBonus),
+        GetScore(1, nameof(HandTypes.FourOfAKind), FourOfKindInMiddleRoundBonus),
+        GetScore(1, nameof(HandTypes.StraightFlush), StraightFlushInMiddleRoundBonus),
+        GetScore(2, nameof(HandTypes.FourOfAKind), FourOfKindInLastRoundBonus),
+        GetScore(2, nameof(HandTypes.StraightFlush), StraightFlushInLastRoundBonus),
       }.Sum();
 
       int GetScore(int roundIdx, string handName, int bonus)

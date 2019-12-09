@@ -33,7 +33,7 @@ namespace ChinesePoker.ML
           foreach (var p3Rounds in strategy.GetBestRounds(players[2].ToList(), BestRoundsToTake))
           foreach (var p4Rounds in strategy.GetBestRounds(players[3].ToList(), BestRoundsToTake))
           {
-            var result = scoreKeeper.GetScore(new[] {p1Rounds, p2Rounds, p3Rounds, p4Rounds});
+            var result = scoreKeeper.GetScores(new[] {p1Rounds, p2Rounds, p3Rounds, p4Rounds});
             foreach (var r in result)
               OutputResult(Writer, r.Key, r.Value);
 

@@ -11,7 +11,7 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correctly_identify_one()
     {
       var cards = Dealer.GetCards("23,25,26,22,24");
-      var hand = cards.GetHand<StraightFlush>();
+      var hand = cards.GetHand();
       Assert.NotNull(hand);
       hand.Cards.TestCardsAreInOrder("22,23,24,25,26");
     }
@@ -20,8 +20,8 @@ namespace ChinesePoker.Core.Tests.HandType
     public void does_not_mistaken_straight_flush_with_just_flush()
     {
       var cards = Dealer.GetCards("13,35,46,12,24");
-      var sf = new StraightFlush();
-      Assert.False(sf.TestIsHand(cards));
+      var sf = cards.GetHand();
+      Assert.NotEqual($"{nameof(HandTypes.StraightFlush)}", sf.Name);
     }
   }
 }

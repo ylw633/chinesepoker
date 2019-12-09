@@ -7,9 +7,11 @@ using ChinesePoker.Core.Model;
 
 namespace ChinesePoker.Core.Interface
 {
-  public interface IScoreCalculator
+  public interface IStrengthStrategy
   {
-    int GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB);
-    Dictionary<Round, int> GetScores(IList<Round> rounds);
+    Hand GetAHand(IEnumerable<Card> cards);
+    int CompareHands(Hand x, Hand y);
+
+    int ComputeHandsStrength(IEnumerable<Hand> hands);
   }
 }

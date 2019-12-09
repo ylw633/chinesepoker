@@ -9,17 +9,17 @@ namespace ChinesePoker.Core.Model
   public class Round
   {
     public IList<Hand> Hands { get; private set; }
-    public int TotalStrength { get; private set; }
+    public int Strength { get; private set; }
 
-    public Round(IList<Hand> hands)
+    public Round(IList<Hand> hands, int strength)
     {
       Hands = hands;
-      TotalStrength = hands.Sum(h => h.Strength);
+      Strength = strength;
     }
 
     public override string ToString()
     {
-      return $"{TotalStrength}\n{string.Join("\n", Hands)}";
+      return $"{Strength}\n{string.Join("\n", Hands)}";
     }
   }
 

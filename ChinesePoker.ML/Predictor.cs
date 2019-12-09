@@ -62,7 +62,7 @@ namespace ChinesePoker.ML
         var round4 = simpleStrategy.GetBestRound(sets[3]);
 
         var rounds = new[] {round1, round2, round3, round4};
-        var result = scoreKeeper.GetScore(rounds).ToList();
+        var result = scoreKeeper.GetScores(rounds).ToList();
 
         for (int i = 0; i < 4; i++)
         {
@@ -71,7 +71,7 @@ namespace ChinesePoker.ML
 
         Console.WriteLine("---------------------------");
         rounds = new[] {round0, round2, round3, round4};
-        result = scoreKeeper.GetScore(rounds).ToList();
+        result = scoreKeeper.GetScores(rounds).ToList();
 
         for (int i = 0; i < 4; i++)
         {
@@ -108,11 +108,11 @@ namespace ChinesePoker.ML
           var typeA = new[] {round0, round2, round3, round4};
           var typeB = new[] {round1, round2, round3, round4};
 
-          var result = scoreKeeper.GetScore(typeA).ToList();
+          var result = scoreKeeper.GetScores(typeA).ToList();
           for (int i = 0; i < 4; i++)
             gameResultA[i] += result[i].Value;
 
-          result = scoreKeeper.GetScore(typeB).ToList();
+          result = scoreKeeper.GetScores(typeB).ToList();
           for (int i = 0; i < 4; i++)
             gameResultB[i] += result[i].Value;
 

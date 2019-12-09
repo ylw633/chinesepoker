@@ -13,12 +13,11 @@ namespace ChinesePoker.Core.Tests.HandType
   public class FlushTests
   {
     [Fact]
-    public void should_correcty_identify_flush()
+    public void should_correctly_identify_flush()
     {
       var cards = Dealer.GetCards("47,48,4K,410,42");
-      var hand = new Flush().GetHand(cards);
+      var hand = cards.GetHand();
       Assert.NotNull(hand);
-      hand.Cards.TestCardsAreInOrder("4K,410,48,47,42");
     }
   }
 }

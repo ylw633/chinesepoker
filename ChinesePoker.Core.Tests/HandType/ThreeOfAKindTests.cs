@@ -16,16 +16,15 @@ namespace ChinesePoker.Core.Tests.HandType
     public void should_correctly_identify_with_5_cards()
     {
       var cards = Dealer.GetCards("H2,C8,S5,S8,D8");
-      var hand = cards.GetHand<ThreeOfAKind>();
+      var hand = cards.GetHand();
       Assert.NotNull(hand);
-      hand.Cards.TestCardsAreInOrder("S8,D8,C8,S5,H2");
     }
 
     [Fact]
     public void should_correctly_identify_with_3_cards()
     {
       var cards = Dealer.GetCards("17,27,37");
-      var hand = cards.GetHand<ThreeOfAKind>();
+      var hand = cards.GetHand();
       Assert.NotNull(hand);
       hand.Cards.TestCardsAreInOrder("17,27,37");
     }
@@ -34,8 +33,8 @@ namespace ChinesePoker.Core.Tests.HandType
     public void dont_mistaken_full_house_with_three_of_a_kind()
     {
       var cards = Dealer.GetCards("210,310,113,413,313");
-      var hand = cards.GetHand<ThreeOfAKind>();
-      Assert.Null(hand);
+      var hand = cards.GetHand();
+      Assert.NotEqual(nameof(HandTypes.ThreeOfAKind), hand.Name);
     }
   }
 }

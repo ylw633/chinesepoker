@@ -20,16 +20,7 @@ namespace ChinesePoker.Core.Model
   {
     public const string VALID_RANKS = "A23456789TJQK";
 
-    private SuitTypes _suit;
-
-    public SuitTypes Suit
-    {
-      get => _suit;
-      private set
-      {
-        _suit = value;
-      }
-    }
+    public SuitTypes Suit { get; private set; }
 
     private char _rank;
     public char Rank
@@ -41,7 +32,7 @@ namespace ChinesePoker.Core.Model
         if (!VALID_RANKS.Contains(rank)) throw new Exception($"Invalid rank: {rank}");
 
         _rank = rank;
-        Ordinal = OrdinalToRank(rank);
+        Ordinal = RankToOrdinal(rank);
       }
     }
 
@@ -65,7 +56,7 @@ namespace ChinesePoker.Core.Model
 
     public static char OrdinalToRank(int carNum)
     {
-      if (carNum < 1 || carNum > 13) throw new ArgumentException("Invalid input", nameof(carNum));
+      if (carNum < 1 || carNum > 13) throw new ArgumentException($"Invalid input: {carNum} ", nameof(carNum));
 
       switch (carNum)
       {
@@ -153,14 +144,14 @@ namespace ChinesePoker.Core.Model
 
     protected bool Equals(Card other)
     {
-      return _suit == other._suit && _rank == other._rank && Ordinal == other.Ordinal;
+      return Suit == other.Suit && _rank == other._rank && Ordinal == other.Ordinal;
     }
 
     public override int GetHashCode()
     {
       unchecked
       {
-        var hashCode = (int) _suit;
+        var hashCode = (int) Suit;
         hashCode = (hashCode * 397) ^ _rank.GetHashCode();
         hashCode = (hashCode * 397) ^ Ordinal;
         return hashCode;

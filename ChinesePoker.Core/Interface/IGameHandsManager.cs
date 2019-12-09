@@ -9,8 +9,7 @@ namespace ChinesePoker.Core.Interface
 {
   public interface IGameHandsManager
   {
+    IStrengthStrategy StrengthStrategy { get; }
     Hand DetermineHand(IEnumerable<Card> cards, Hand maxHand = null);
-
-    int MinHandStrengthThreshold { get; }
   }
 }

@@ -14,9 +14,9 @@ namespace ChinesePoker.ML
 
     static void Main(string[] args)
     {
-      //GenerateData();
+      GenerateData();
       //Train();
-      Prediction();
+      //Prediction();
     }
 
     static void GenerateData()

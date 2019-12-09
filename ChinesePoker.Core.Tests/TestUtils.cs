@@ -4,6 +4,8 @@ using System.Linq;
 using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
+using ChinesePoker.Core.Component;
+using ChinesePoker.Core.Component.HandBuilders;
 using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
 using Xunit;
@@ -22,9 +24,9 @@ namespace ChinesePoker.Core.Tests
         Assert.Equal(expectedCards[i], cards[i]);
     }
 
-    public static Hand GetHand<T>(this IList<Card> cards) where T : IHandBuilder, new()
+    public static Hand GetHand(this IList<Card> cards)
     {
-      return new T().GetHand(cards);
+      return new BasicStrengthStrategy().GetAHand(cards);
     }
   }
 }

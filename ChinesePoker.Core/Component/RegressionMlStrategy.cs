@@ -17,7 +17,7 @@ namespace ChinesePoker.Core.Component
   {
     protected PredictionFunction<RoundData, T> Oracle { get; set; }
     public IGameHandsManager GameHandsManager { get; set; } = new PokerHandBuilderManager();
-    protected virtual Func<IEnumerable<KeyValuePair<Round, object>>, IOrderedEnumerable<KeyValuePair<Round, object>>> Ordering { get; } = enu => enu.OrderByDescending(r => r.Value).ThenByDescending(r => r.Key.TotalStrength);
+    protected virtual Func<IEnumerable<KeyValuePair<Round, object>>, IOrderedEnumerable<KeyValuePair<Round, object>>> Ordering { get; } = enu => enu.OrderByDescending(r => r.Value).ThenByDescending(r => r.Key.Strength);
 
     protected MlStrategyBase(string trainedModelFilePath)
     {

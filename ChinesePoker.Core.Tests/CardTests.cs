@@ -17,8 +17,6 @@ namespace ChinesePoker.Core.Tests
       Assert.Equal(SuitTypes.Spade, card.Suit);
       Assert.Equal('K', card.Rank);
       Assert.Equal(13, card.Ordinal);
-      Assert.Equal(5, card.RankingAsc);
-      Assert.Equal(48, card.RankingDsc);
     }
 
     [Fact]

@@ -16,8 +16,8 @@ namespace ChinesePoker.Core.Component
     // we have a lot of combo in all possible rounds, but only several types of hands combinations, GetSensibleRounds returns the strongest round from each type of hand type combination rounds
     public IEnumerable<Round> GetPossibleRounds(IList<Card> cards)
     {
-      var allPossibleArrangements = RoundStrategyExtension.GetAllPossibleRounds(GameHandsManager, cards);
-      return allPossibleArrangements.GroupBy(r => string.Join("_", r.Hands.Select(h => h.Name))).Select(typeCombo => typeCombo.OrderByDescending(r => r.TotalStrength).First());
+      var allPossibleArrangements = GameHandsManager.GetAllPossibleRounds(cards);
+      return allPossibleArrangements.GroupBy(r => string.Join("_", r.Hands.Select(h => h.Name))).Select(typeCombo => typeCombo.OrderByDescending(r => r.Strength).First());
     }
     public Round GetBestRound(IList<Card> cards)
     {
@@ -26,7 +26,7 @@ namespace ChinesePoker.Core.Component
 
     public IEnumerable<Round> GetBestRounds(IList<Card> cards, int take = 1)
     {
-      return GetPossibleRounds(cards).OrderByDescending(r => r.TotalStrength).Take(take);
+      return GetPossibleRounds(cards).OrderByDescending(r => r.Strength).Take(take);
     }
   }
 }

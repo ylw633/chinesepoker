@@ -121,10 +121,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Component\CategorizationMlStrategy.cs" />
+    <Compile Include="Component\BasicStrengthStrategy.cs" />
     <Compile Include="Component\RegressionMlStrategy.cs" />
     <Compile Include="Component\SimpleRoundStrategy.cs" />
     <Compile Include="Component\PokerHandBuilderManager.cs" />
     <Compile Include="Component\TaiwaneseScoreCalculator.cs" />
+    <Compile Include="Helper\AllHandsGenerator.cs" />
+    <Compile Include="Helper\CardComparer.cs" />
     <Compile Include="Helper\IEnumerableExtension.cs" />
     <Compile Include="Helper\RoundStrategyExtension.cs" />
     <Compile Include="Interface\IGameHandsManager.cs" />
@@ -135,17 +138,6 @@
     <Compile Include="Model\Card.cs" />
     <Compile Include="Model\Dealer.cs" />
     <Compile Include="Model\Hand.cs" />
-    <Compile Include="Component\HandBuilders\Dragon.cs" />
-    <Compile Include="Component\HandBuilders\Flush.cs" />
-    <Compile Include="Component\HandBuilders\FourOfAKind.cs" />
-    <Compile Include="Component\HandBuilders\FullHouse.cs" />
-    <Compile Include="Component\HandBuilders\HandBuilderBase.cs" />
-    <Compile Include="Component\HandBuilders\HighCard.cs" />
-    <Compile Include="Component\HandBuilders\OnePair.cs" />
-    <Compile Include="Component\HandBuilders\Straight.cs" />
-    <Compile Include="Component\HandBuilders\StraightFlush.cs" />
-    <Compile Include="Component\HandBuilders\ThreeOfAKind.cs" />
-    <Compile Include="Component\HandBuilders\TwoPair.cs" />
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Round.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
