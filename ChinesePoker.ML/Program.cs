@@ -9,7 +9,7 @@ namespace ChinesePoker.ML
 {
   class Program
   {
-    public const string RawDataPath = @"D:\ws\temp\cpRecords.txt";
+    public const string RawDataPath = @"D:\ws\temp\cpRecords2.txt";
     public const string TrainedModelPath = @"D:\ws\temp\cpModel2.zip";
 
     static void Main(string[] args)
@@ -35,8 +35,8 @@ namespace ChinesePoker.ML
     static void Prediction()
     {
       var predictor = new Predictor();
-      predictor.SimulationComparison(TrainedModelPath);
-      //predictor.Go(TrainedModelPath);
+      //predictor.SimulationComparison(TrainedModelPath);
+      predictor.Go(TrainedModelPath);
     }
   }
 }

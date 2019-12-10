@@ -14,8 +14,8 @@ namespace ChinesePoker.Core.Helper
     public static IEnumerable<Round> GetAllPossibleRounds(this IGameHandsManager handsManager, IList<Card> cards)
     {
       if (cards.Count != 13) throw new Exception("not enough cards");
-      var hand = handsManager.DetermineHand(cards); // if it's a dragon
-      if (hand != null)
+      var hand = handsManager.DetermineHand(cards); // check if it's a dragon
+      if (hand != null) // it's a dragon
       {
         yield return new Round(new List<Hand> { hand }, handsManager.StrengthStrategy.ComputeHandsStrength(new List<Hand> { hand }));
         yield break;

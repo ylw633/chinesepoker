@@ -32,11 +32,16 @@ namespace ChinesePoker.ML
       {
         var sets = Dealer.Deal().ToList();
         var player = new CategorizationMlStrategy(modelPath);
-        //var player = new RegressionMlStrategy(modelPath);
+        var playerSimple = new SimpleRoundStrategy();
 
-        foreach (var round in player.GetBestRoundsWithScore(sets[0], 10))
+        var mlRounds = player.GetBestRoundsWithScore(sets[0], 10).ToList();
+        var simpleRounds = playerSimple.GetBestRounds(sets[0], 10).ToList();
+
+        for (int i = 0; i < mlRounds.Count; i++)
         {
-          Console.WriteLine($"{round.Key}\n{round.Value}\n");
+          Console.WriteLine($"{mlRounds[i].Value,-4} {mlRounds[i].Key}");
+          Console.WriteLine($"     {simpleRounds[i]}");
+          Console.WriteLine("======================");
         }
 
         line = Console.ReadLine();
@@ -48,7 +53,7 @@ namespace ChinesePoker.ML
     {
       var mlStrategy = new RegressionMlStrategy(modelPath);
       var simpleStrategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator();
+      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthStrategy);
 
       string line;
       do
@@ -87,7 +92,7 @@ namespace ChinesePoker.ML
     {
       var mlStrategy = new CategorizationMlStrategy(modelPath);
       var simpleStrategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator();
+      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthStrategy);
 
       int rA = 0, rB = 0;
       for (int k = 0; k < 100; k++)

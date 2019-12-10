@@ -36,7 +36,7 @@ namespace ChinesePoker.Core.Model
 
     public override string ToString()
     {
-      return $"{Name} {Strength} {string.Join(" ", Cards)}";
+      return $"{Name,-13} {Strength,-6} {string.Join(" ", Cards)}";
     }
   }
 }

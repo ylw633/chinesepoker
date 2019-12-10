@@ -12,6 +12,8 @@ namespace ChinesePoker.Core.Component
 {
   public class TaiwaneseScoreCalculator : IScoreCalculator
   {
+    public IStrengthStrategy StrengthStrategy { get; set; }
+
     public int StrikeBonus { get; set; } = 3;
     public int ThreeOfKindInFirstRoundBonus { get; set; } = 3;
     public int FourOfKindInMiddleRoundBonus { get; set; } = 0;
@@ -20,6 +22,12 @@ namespace ChinesePoker.Core.Component
     public int StraightFlushInLastRoundBonus { get; set; } = 5;
     public int DragonBonus { get; set; } = 36;
     public int HomeRunBonus { get; set; } = 6;
+
+    public TaiwaneseScoreCalculator(IStrengthStrategy strengthStrategy)
+    {
+      StrengthStrategy = strengthStrategy;
+    }
+
     public int GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
     {
       scoreA = scoreB = 0;
@@ -35,7 +43,7 @@ namespace ChinesePoker.Core.Component
       {
         for (int i = 0; i < 3; i++)
         {
-          pts += roundA.Hands[i].Strength.CompareTo(roundB.Hands[i].Strength);
+          pts += StrengthStrategy.CompareHands(roundA.Hands[i], roundB.Hands[i]);
         }
 
         if (pts == 3)
@@ -73,9 +81,12 @@ namespace ChinesePoker.Core.Component
       {
         var strike = GetScore(match[0], match[1], out var scoreA, out var scoreB);
         result[match[0]].Score += scoreA;
-        result[match[0]].StrikeCount += strike;
         result[match[1]].Score += scoreB;
-        result[match[0]].StrikeCount -= strike;
+        
+        if (strike == 1)
+          result[match[0]].StrikeCount++;
+        else if (strike == -1)
+          result[match[1]].StrikeCount++;
       }
 
       // home run case

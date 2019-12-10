@@ -19,7 +19,7 @@ namespace ChinesePoker.Core.Model
 
     public override string ToString()
     {
-      return $"{Strength}\n{string.Join("\n", Hands)}";
+      return $"{Strength} {string.Join(" ", Hands.Select(h => $"({h})"))}";
     }
   }
 

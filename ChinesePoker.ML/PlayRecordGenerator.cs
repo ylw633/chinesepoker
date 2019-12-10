@@ -4,48 +4,62 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ChinesePoker.Core.Component;
+using ChinesePoker.Core.Component.HandBuilders;
 using ChinesePoker.Core.Model;
 using Combinatorics.Collections;
+using Common;
 
 namespace ChinesePoker.ML
 {
   public class PlayRecordGenerator
   {
-    public int BestRoundsToTake { get; set; } = 7;
+    public int BestRoundsToTake { get; set; } = 4;
     private StreamWriter Writer { get; set; }
     public void Go(string outFileName, int recordNeeded = 1_000_000)
     {
       var count = 0;
       var strategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator();
+      var scoreKeeper = new TaiwaneseScoreCalculator(strategy.GameHandsManager.StrengthStrategy);
       var timer = new Stopwatch();
       timer.Start();
       Writer = new StreamWriter(outFileName, true);
+
+      var players = Dealer.Deal().ToList();
+      var playerRounds = new SynchronizedCollection<IList<Round>>();
+
       while (count < recordNeeded)
       {
-        //using (var sw = new StreamWriter(outFileName, true))
+        Parallel.ForEach(players, p =>
         {
-          var players = Dealer.Deal().ToList();
-          foreach (var p1Rounds in strategy.GetBestRounds(players[0].ToList(), BestRoundsToTake))
-          foreach (var p2Rounds in strategy.GetBestRounds(players[1].ToList(), BestRoundsToTake))
-          foreach (var p3Rounds in strategy.GetBestRounds(players[2].ToList(), BestRoundsToTake))
-          foreach (var p4Rounds in strategy.GetBestRounds(players[3].ToList(), BestRoundsToTake))
+          playerRounds.Add(strategy.GetBestRounds(p.ToList(), BestRoundsToTake).ToList());
+        });
+
+        Parallel.ForEach(playerRounds[0], p1Round =>
+        Parallel.ForEach(playerRounds[1], p2Round =>
+        Parallel.ForEach(playerRounds[2], p3Round =>
+        Parallel.ForEach(playerRounds[3], p4Round =>
+        {
+          var result = scoreKeeper.GetScores(new[] { p1Round, p2Round, p3Round, p4Round });
+          lock (this)
           {
-            var result = scoreKeeper.GetScores(new[] {p1Rounds, p2Rounds, p3Rounds, p4Rounds});
             foreach (var r in result)
               OutputResult(Writer, r.Key, r.Value);
-
             count += 4;
             if (count % 10_000 == 0)
             {
               Console.WriteLine($"count {count}, time: {timer.Elapsed}");
             }
+
           }
-        }
+        }))));
       }
+
       timer.Stop();
+      ConsoleHelper.ConsolePressAnyKey();
+      Writer.Flush();
       Writer.Dispose();
     }
 
@@ -58,7 +72,6 @@ namespace ChinesePoker.ML
 
     ~PlayRecordGenerator()
     {
-      Writer.Flush();
       Writer.Dispose();
     }
   }

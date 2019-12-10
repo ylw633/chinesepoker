@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChinesePoker.Core.Component;
+using ChinesePoker.Core.Component.HandBuilders;
 using ChinesePoker.Core.Model;
 using Xunit;
 
@@ -20,7 +21,7 @@ namespace ChinesePoker.Core.Tests
       var roundA = strategy.GetBestRound(sets[0]);
       var roundB = strategy.GetBestRound(sets[1]);
 
-      var calculator = new TaiwaneseScoreCalculator();
+      var calculator = new TaiwaneseScoreCalculator(new BasicStrengthStrategy());
       calculator.GetScore(roundA, roundB, out var scoreA, out var scoreB);
 
       Assert.Equal(scoreA, -scoreB);
@@ -33,7 +34,7 @@ namespace ChinesePoker.Core.Tests
       var strategy = new SimpleRoundStrategy();
       var sets = Dealer.Deal().ToArray();
       
-      var calculator = new TaiwaneseScoreCalculator();
+      var calculator = new TaiwaneseScoreCalculator(new BasicStrengthStrategy());
       var scores = calculator.GetScores(sets.Select(strategy.GetBestRound).ToList());
 
       Assert.Equal(0, scores.Sum(kv => kv.Value));
