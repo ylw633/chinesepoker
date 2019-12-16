@@ -36,5 +36,20 @@ namespace ChinesePoker.Core.Tests.HandType
       var hand = cards.GetHand();
       Assert.NotEqual(nameof(HandTypes.ThreeOfAKind), hand.Name);
     }
+
+    [Fact]
+    public void toak3_and_toak5_compare_should_get_correct_result()
+    {
+      var toak3 = Dealer.GetCards("C2 S2 D2").GetHand();
+      var toak5 = Dealer.GetCards("DA D2 C2 H2 ST").GetHand();
+
+      Assert.Equal(nameof(HandTypes.ThreeOfAKind), toak3.Name);
+      Assert.Equal(nameof(HandTypes.ThreeOfAKind), toak5.Name);
+      Assert.Equal(0, toak3.CompareHand(toak5));
+
+      toak5 = Dealer.GetCards("DA CA SA HQ DK").GetHand();
+      Assert.Equal(nameof(HandTypes.ThreeOfAKind), toak5.Name);
+      Assert.Equal(-1, toak3.CompareHand(toak5));
+    }
   }
 }

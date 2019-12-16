@@ -41,5 +41,24 @@ namespace ChinesePoker.Core.Tests.HandType
       var cards = Dealer.GetCards("SA,HA,Sk,HQ,CQ");
       Assert.NotEqual(nameof(HandTypes.OnePair), cards.GetHand().Name);
     }
+
+    [Fact]
+    public void one_pair3_and_one_pair5_compare_should_get_correct_result()
+    {
+      var pair3 = Dealer.GetCards("CQ SK CK").GetHand();
+      var pair5 = Dealer.GetCards("DA D2 C2 H9 ST").GetHand();
+
+      Assert.Equal(nameof(HandTypes.OnePair), pair3.Name);
+      Assert.Equal(nameof(HandTypes.OnePair), pair5.Name);
+      Assert.Equal(1, pair3.CompareHand(pair5));
+
+      pair5 = Dealer.GetCards("DA D2 C3 HK DK").GetHand();
+      Assert.Equal(nameof(HandTypes.OnePair), pair5.Name);
+      Assert.Equal(-1, pair3.CompareHand(pair5));
+
+      pair5 = Dealer.GetCards("D2 D3 CQ HK DK").GetHand();
+      Assert.Equal(nameof(HandTypes.OnePair), pair5.Name);
+      Assert.Equal(0, pair3.CompareHand(pair5));
+    }
   }
 }

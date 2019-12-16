@@ -9,27 +9,27 @@ namespace ChinesePoker.ML
 {
   class Program
   {
-    public const string RawDataPath = @"D:\ws\temp\cpRecords2.txt";
+    public const string RawDataPath = @"D:\ws\temp\cpRecords.txt";
     public const string TrainedModelPath = @"D:\ws\temp\cpModel2.zip";
 
     static void Main(string[] args)
     {
-      GenerateData();
+      //GenerateData();
       //Train();
-      //Prediction();
+      Prediction();
     }
 
     static void GenerateData()
     {
       var gen = new PlayRecordGenerator();
-      gen.Go(RawDataPath, 10_000_000);
+      gen.Go(RawDataPath, 4_000_000);
     }
 
     static void Train()
     {
       var trainer = new Trainer();
-      //trainer.RegressionTraining(RawDataPath, TrainedModelPath);
-      trainer.CategorizationTraining(RawDataPath, TrainedModelPath);
+      trainer.RegressionTraining(RawDataPath, TrainedModelPath);
+      //trainer.CategorizationTraining(RawDataPath, TrainedModelPath);
     }
 
     static void Prediction()

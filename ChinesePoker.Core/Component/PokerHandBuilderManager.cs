@@ -13,7 +13,7 @@ namespace ChinesePoker.Core.Component
 
   public class PokerHandBuilderManager : IGameHandsManager
   {
-    public IStrengthStrategy StrengthStrategy { get; } = new BasicStrengthStrategy();
+    public IStrengthStrategy StrengthStrategy { get; } = new PokerStrengthStrategy();
 
     public Hand DetermineHand(IEnumerable<Card> cards, Hand maxHand = null)
     {

@@ -9,6 +9,7 @@ namespace ChinesePoker.Core.Interface
 {
   public interface IStrengthStrategy
   {
+    int CardRankToStrength(char rank);
     Hand GetAHand(IEnumerable<Card> cards);
     int CompareHands(Hand x, Hand y);
 

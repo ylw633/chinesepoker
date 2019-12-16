@@ -31,7 +31,8 @@ namespace ChinesePoker.ML
       do
       {
         var sets = Dealer.Deal().ToList();
-        var player = new CategorizationMlStrategy(modelPath);
+        //var player = new CategorizationMlStrategy(modelPath);
+        var player = new RegressionMlStrategy(modelPath);
         var playerSimple = new SimpleRoundStrategy();
 
         var mlRounds = player.GetBestRoundsWithScore(sets[0], 10).ToList();
@@ -39,7 +40,7 @@ namespace ChinesePoker.ML
 
         for (int i = 0; i < mlRounds.Count; i++)
         {
-          Console.WriteLine($"{mlRounds[i].Value,-4} {mlRounds[i].Key}");
+          Console.WriteLine($"{mlRounds[i].Value,-4:0} {mlRounds[i].Key}");
           Console.WriteLine($"     {simpleRounds[i]}");
           Console.WriteLine("======================");
         }

@@ -47,10 +47,10 @@ namespace ChinesePoker.ML
           nameof(RoundData.MiddleHandStrength),
           nameof(RoundData.LastHandStrength)))
         .AppendCacheCheckpoint(mlContext);
-      //var trainer = mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent();
+      var trainer = mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent();
 
-      var averagedPerceptronBinaryTrainer = mlContext.BinaryClassification.Trainers.AveragedPerceptron(numIterations: 10);
-      var trainer = mlContext.MulticlassClassification.Trainers.OneVersusAll(averagedPerceptronBinaryTrainer);
+      //var averagedPerceptronBinaryTrainer = mlContext.BinaryClassification.Trainers.AveragedPerceptron(numIterations: 10);
+      //var trainer = mlContext.MulticlassClassification.Trainers.OneVersusAll(averagedPerceptronBinaryTrainer);
 
       var trainerPipeline = dataPipeline.Append(trainer).Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
@@ -97,7 +97,7 @@ namespace ChinesePoker.ML
           nameof(RoundData.FirstHandStrength),
           nameof(RoundData.MiddleHandStrength),
           nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Regression.Trainers.FastForest());
+        .Append(mlContext.Regression.Trainers.StochasticDualCoordinateAscent());
 
       var preview = dataView.Preview();
       var transPreview = pipeline.Preview(dataView);

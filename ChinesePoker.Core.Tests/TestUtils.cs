@@ -26,7 +26,12 @@ namespace ChinesePoker.Core.Tests
 
     public static Hand GetHand(this IList<Card> cards)
     {
-      return new BasicStrengthStrategy().GetAHand(cards);
+      return new PokerStrengthStrategy().GetAHand(cards);
+    }
+
+    public static int CompareHand(this Hand handA, Hand handB)
+    {
+      return new PokerStrengthStrategy().CompareHands(handA, handB);
     }
   }
 }

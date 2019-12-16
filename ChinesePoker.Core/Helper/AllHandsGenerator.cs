@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChinesePoker.Core.Component.HandBuilders;
 using ChinesePoker.Core.Model;
 
 namespace ChinesePoker.Core.Helper
@@ -30,7 +31,7 @@ namespace ChinesePoker.Core.Helper
 
     public void Print(Func<IEnumerable<string>> getFunc, IEnumerable<Func<string, string>> compDelegate)
     {
-      var cardComparer = new CardComparer(compDelegate);
+      var cardComparer = new CardComparer(HandStats.RankToStrength, compDelegate);
       int i = 0;
 			foreach (var a in getFunc().OrderBy(s => s, cardComparer))
       {

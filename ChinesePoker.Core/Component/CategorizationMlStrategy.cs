@@ -34,7 +34,7 @@ namespace ChinesePoker.Core.Component
     {
     }
 
-    protected  override Dictionary<Round, object> GetPrediction(IList<Card> cards)
+    protected override Dictionary<Round, object> GetPrediction(IList<Card> cards)
     {
       return GameHandsManager.GetAllPossibleRounds(cards).ToDictionary(r => r, r => Oracle.Predict(new RoundData
       {

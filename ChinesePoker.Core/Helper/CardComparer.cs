@@ -10,14 +10,16 @@ namespace ChinesePoker.Core.Helper
   public class CardComparer : IComparer<string>
   {
     List<Func<string, string>> GroupSelector { get; }
-    public CardComparer()
+    private Func<char, int> GetRankStrength { get; }
+
+    public CardComparer(Func<char, int> getRankStrength) : this(getRankStrength, new List<Func<string, string>>() { f => f })
     {
-      GroupSelector = new List<System.Func<string, string>>() { f => f };
     }
 
-    public CardComparer(IEnumerable<Func<string, string>> groupSelector)
+    public CardComparer(Func<char, int> getRankStrength, IEnumerable<Func<string, string>> groupSelector)
     {
-      GroupSelector = new List<System.Func<string, string>>(groupSelector);
+      GroupSelector = new List<Func<string, string>>(groupSelector);
+      GetRankStrength = getRankStrength;
     }
 
     public int Compare(string x, string y)
@@ -41,14 +43,13 @@ namespace ChinesePoker.Core.Helper
       return 0;
     }
 
-    private int O2S(int o) { return o == 1 ? 14 : o; }
     private int FindLargest(string str, out int idx)
     {
       idx = -1;
       int maxVal = -1;
       for (int i = 0; i < str.Length; i++)
       {
-        var strength = O2S(Card.RankToOrdinal(str[i]));
+        var strength = GetRankStrength(str[i]);
         if (strength > maxVal)
         {
           maxVal = strength;

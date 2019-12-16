@@ -121,7 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Component\CategorizationMlStrategy.cs" />
-    <Compile Include="Component\BasicStrengthStrategy.cs" />
+    <Compile Include="Component\PokerStrengthStrategy.cs" />
     <Compile Include="Component\RegressionMlStrategy.cs" />
     <Compile Include="Component\SimpleRoundStrategy.cs" />
     <Compile Include="Component\PokerHandBuilderManager.cs" />

@@ -9,68 +9,90 @@ namespace ChinesePoker.Core.Component.HandBuilders
 {
   public class HandStats
   {
-    public HandTypes Type { get; set; }
-    public Dictionary<string, int> HandStrength { get; set; }
-    public int OccurrenceMultiplier { get; set; }
+    private const int Scale = 100000;
+    public HandTypes Type { get; }
+    public Dictionary<string, int> HandStrength { get; }
 
-    public HandStats(HandTypes type, IEnumerable<string> handStrength, int occrMul, ref int strOffset)
+    public HandStats(HandTypes type, IList<string> handStrength, double probabilityBase, double probabilityCeiling, Func<IList<string>, double, double, Dictionary<string, int>> buildStrengthFunc = null)
     {
       Type = type;
-      HandStrength = GetStrengthLookup(handStrength, occrMul, ref strOffset);
-      OccurrenceMultiplier = occrMul;
+      HandStrength = buildStrengthFunc == null ? DefaultGetStrengthLookup(handStrength, probabilityBase, probabilityCeiling) : buildStrengthFunc(handStrength, probabilityBase, probabilityCeiling);
     }
 
-    private static Dictionary<string, int> GetStrengthLookup(IEnumerable<string> sortedHands, int occrMul, ref int strOffset)
+    public static Dictionary<string, int> DefaultGetStrengthLookup(IList<string> sortedHands, double probabilityBase, double probabilityCeiling)
+    {
+      var i = 0;
+      return sortedHands.ToDictionary(s => s, s => PercentileToStrength(probabilityBase + (i++ / (double) sortedHands.Count * (probabilityCeiling - probabilityBase))));
+    }
+
+    public static Dictionary<string, int> CardCountGetStrengthLookup(IList<string> sortedHands, double probabilityBase, double probabilityCeiling, int count)
     {
       var ret = new Dictionary<string, int>();
-      foreach (var s in sortedHands)
+      foreach (var hand in sortedHands)
       {
-        ret.Add(s, strOffset);
-        strOffset += occrMul;
+        var rank = hand.GroupBy(c => c).FirstOrDefault(g => g.Count() == count)?.Key.ToString();
+        if (string.IsNullOrEmpty(rank))
+          throw new Exception($"Expecting hand {hand} to have {count} of same rank but is not found.");
+        ret.Add(hand, PercentileToStrength(probabilityBase + (RankToStrength(rank[0]) - 2) / (double)13 * (probabilityCeiling - probabilityBase)));
       }
 
       return ret;
     }
-	}
 
-	public class BasicStrengthStrategy : IStrengthStrategy
+    public static int PercentileToStrength(double percentile)
+    {
+      return (int)Math.Round(percentile * Scale);
+    }
+
+    public static double StrengthToPercentile(int strength)
+    {
+      return strength / (double)Scale;
+    }
+
+    public static int RankToStrength(char rank)
+    {
+      var strength = Card.RankToOrdinal(rank);
+      return char.ToUpper(rank) == 'A' ? 14 : strength;
+    }
+  }
+
+	public class PokerStrengthStrategy : IStrengthStrategy
 	{
 		#region static preparation
 
-    public static readonly int ThreeCardsTotalPossibilities;
-    public static readonly int FiveCardsTotalPossibilities;
 		public static Dictionary<HandTypes, HandStats> FiveCardsStrengthLookup { get; } = new Dictionary<HandTypes, HandStats>();
     public static Dictionary<HandTypes, HandStats> ThreeCardsStrengthLookup { get; } = new Dictionary<HandTypes, HandStats>();
 		public static Dictionary<HandTypes, HandStats> ThirteenCardsStrengthLookup { get; } = new Dictionary<HandTypes, HandStats>();
 
-    static BasicStrengthStrategy()
+    static PokerStrengthStrategy()
     {
-      var strength = 0;
-      ThreeCardsStrengthLookup.Add(HandTypes.HighCard, new HandStats(HandTypes.HighCard, AllHighCards3Sorted, 64 /* C(4,1)^3 */, ref strength));
-      ThreeCardsStrengthLookup.Add(HandTypes.OnePair, new HandStats(HandTypes.OnePair, AllOnePair3Sorted, 24 /* C(4, 2) * C(4,1) */, ref strength));
-      ThreeCardsStrengthLookup.Add(HandTypes.ThreeOfAKind, new HandStats(HandTypes.ThreeOfAKind, AllThreeOfAKind3Sorted, 4 /* C(4, 3) */, ref strength));
-			ThreeCardsTotalPossibilities = ThreeCardsStrengthLookup.Sum(kv => kv.Value.OccurrenceMultiplier * kv.Value.HandStrength.Count);
+      ThreeCardsStrengthLookup.Add(HandTypes.HighCard, new HandStats(HandTypes.HighCard, AllHighCards3Sorted, 0, 0.82786));
+      ThreeCardsStrengthLookup.Add(HandTypes.OnePair, new HandStats(HandTypes.OnePair, AllOnePair3Sorted, 0.82786, 0.997195));
+      ThreeCardsStrengthLookup.Add(HandTypes.ThreeOfAKind, new HandStats(HandTypes.ThreeOfAKind, AllThreeOfAKind3Sorted, 0.997195, 1, (list, b, c) => HandStats.CardCountGetStrengthLookup(list, b, c, 3)));
 
-      strength = 0;
-      FiveCardsStrengthLookup.Add(HandTypes.HighCard, new HandStats(HandTypes.HighCard, AllHighCards5Sorted, 1020 /* C(4,1)^5 - C(4,1) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.OnePair, new HandStats(HandTypes.OnePair, AllOnePair5Sorted, 384 /* C(4,2) * C(4,1)^3 */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.TwoPairs, new HandStats(HandTypes.TwoPairs, AllTwoPairsSorted, 144 /* C(4,2)^2 * C(4,1) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.ThreeOfAKind, new HandStats(HandTypes.ThreeOfAKind, AllThreeOfAKind5Sorted, 64 /* C(4,3) * C(4,1)^2 */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.Straight, new HandStats(HandTypes.Straight, AllStraightSorted, 1020 /* C(4,1)^5 - C(4,1) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.Flush, new HandStats(HandTypes.Flush, AllFlushSorted, 4 /* C(4,1) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.FullHouse, new HandStats(HandTypes.FullHouse, AllFullHouseSorted, 24 /* C(4,3) * C(4,2) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.FourOfAKind, new HandStats(HandTypes.FourOfAKind, AllFourOfAKindSorted, 4 /* C(4,4) * C(4,1) */, ref strength));
-      FiveCardsStrengthLookup.Add(HandTypes.StraightFlush, new HandStats(HandTypes.StraightFlush, AllStraightFlushSorted, 4 /* C(4,1) */, ref strength));
-      FiveCardsTotalPossibilities = FiveCardsStrengthLookup.Sum(kv => kv.Value.OccurrenceMultiplier * kv.Value.HandStrength.Count);
+      FiveCardsStrengthLookup.Add(HandTypes.HighCard, new HandStats(HandTypes.HighCard, AllHighCards5Sorted, 0, 0.501177));
+      FiveCardsStrengthLookup.Add(HandTypes.OnePair, new HandStats(HandTypes.OnePair, AllOnePair5Sorted, 0.501177, 0.923746));
+      FiveCardsStrengthLookup.Add(HandTypes.TwoPairs, new HandStats(HandTypes.TwoPairs, AllTwoPairsSorted, 0.923746, 0.971285));
+      FiveCardsStrengthLookup.Add(HandTypes.ThreeOfAKind, new HandStats(HandTypes.ThreeOfAKind, AllThreeOfAKind5Sorted, 0.971285, 0.992413, (list, b, c) => HandStats.CardCountGetStrengthLookup(list, b, c, 3)));
+      FiveCardsStrengthLookup.Add(HandTypes.Straight, new HandStats(HandTypes.Straight, AllStraightSorted, 0.992413, 0.996338));
+      FiveCardsStrengthLookup.Add(HandTypes.Flush, new HandStats(HandTypes.Flush, AllFlushSorted, 0.996338, 0.998303));
+      FiveCardsStrengthLookup.Add(HandTypes.FullHouse, new HandStats(HandTypes.FullHouse, AllFullHouseSorted, 0.998303, 0.999744, (list, b, c) => HandStats.CardCountGetStrengthLookup(list, b, c, 3)));
+      FiveCardsStrengthLookup.Add(HandTypes.FourOfAKind, new HandStats(HandTypes.FourOfAKind, AllFourOfAKindSorted, 0.999744, 0.999984, (list, b, c) => HandStats.CardCountGetStrengthLookup(list, b, c, 4)));
+      FiveCardsStrengthLookup.Add(HandTypes.StraightFlush, new HandStats(HandTypes.StraightFlush, AllStraightFlushSorted, 0.999984, 1));
 
-			strength = 0;
-			ThirteenCardsStrengthLookup.Add(HandTypes.Dragon, new HandStats(HandTypes.Dragon, AllDragon, 1, ref strength));
+			ThirteenCardsStrengthLookup.Add(HandTypes.Dragon, new HandStats(HandTypes.Dragon, AllDragon, 1, 1));
 		}
 		#endregion
 
-		public Hand GetAHand(IEnumerable<Card> cards)
+    public int CardRankToStrength(char rank)
+    {
+      return HandStats.RankToStrength(rank);
+    }
+
+    public Hand GetAHand(IEnumerable<Card> cards)
     {
       if (cards == null) return null;
+      cards = cards.ToList();
       if (cards.Distinct().Count() != cards.Count())
         throw new ArgumentException($"duplicate cards! => {string.Join(" ", cards.Select(c => c.ToString()))} ", nameof(cards));
 
@@ -81,7 +103,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
       {
         case 13:
 					if (ThirteenCardsStrengthLookup[HandTypes.Dragon].HandStrength.ContainsKey(cardRank))
-						return new Hand($"{nameof(HandTypes.Dragon)}", cardList, PercentileToStrength(1));
+						return new Hand($"{nameof(HandTypes.Dragon)}", cardList, ThreeCardsStrengthLookup[HandTypes.Dragon].HandStrength[cardRank]);
           break;
 
         case 5:
@@ -92,7 +114,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
             if (kv.Key == HandTypes.StraightFlush && !IsSameSuit(cardList)) continue;
             if (kv.Key == HandTypes.Flush && !IsSameSuit(cardList)) continue;
 
-            return new Hand($"{kv.Key:G}", cardList, PercentileToStrength(kv.Value.HandStrength[cardRank] / (double)FiveCardsTotalPossibilities));
+            return new Hand($"{kv.Key:G}", cardList, FiveCardsStrengthLookup[kv.Key].HandStrength[cardRank]);
           }
           break;
 
@@ -101,7 +123,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
           {
             if (!kv.Value.HandStrength.ContainsKey(cardRank)) continue;
 
-            return new Hand($"{kv.Key:G}", cardList, PercentileToStrength(kv.Value.HandStrength[cardRank] / (double)ThreeCardsTotalPossibilities));
+            return new Hand($"{kv.Key:G}", cardList, ThreeCardsStrengthLookup[kv.Key].HandStrength[cardRank]);
           }
 					break;
       }
@@ -127,11 +149,11 @@ namespace ChinesePoker.Core.Component.HandBuilders
       switch (handA)
       {
         case HandTypes.HighCard:
-          return new CardComparer().Compare(rankA, rankB);
+          return new CardComparer(CardRankToStrength).Compare(rankA, rankB);
         case HandTypes.OnePair:
-          return new CardComparer(new Func<string, string>[]{ s => s.First().ToString(), s => s.Last().ToString()}).Compare(rankA, rankB);
+          return new CardComparer(CardRankToStrength, new Func<string, string>[]{ s => s.GroupBy(c => c).OrderByDescending(g => g.Count()).First().Key.ToString(), s => s.GroupBy(c => c).Where(g => g.Count() == 1).OrderByDescending(g => CardRankToStrength(g.Key)).First().Key.ToString()}).Compare(rankA, rankB);
         case HandTypes.ThreeOfAKind:
-          return new CardComparer(new Func<string, string>[] { s => s.First().ToString() }).Compare(rankA, rankB);
+          return new CardComparer(CardRankToStrength, new Func<string, string>[] { s => s.GroupBy(c => c).First(g => g.Count() == 3).Key.ToString() }).Compare(rankA, rankB);
         default:
           throw new Exception("impossible scenario, something is wrong");
       }
@@ -139,7 +161,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
 
     public int ComputeHandsStrength(IEnumerable<Hand> hands)
     {
-      return PercentileToStrength(hands.Average(h => StrengthToPercentile(h.Strength)));
+      return (int)Math.Round(hands.Average(h => h.Strength));
     }
 
     public bool IsSameSuit(IList<Card> cards)
@@ -147,16 +169,6 @@ namespace ChinesePoker.Core.Component.HandBuilders
       var firstSuit = cards[0].Suit;
       return cards.Skip(1).All(c => c.Suit == firstSuit);
 		}
-
-    public int PercentileToStrength(double percentile)
-    {
-      return (int)Math.Round(percentile * 100000);
-    }
-
-    public double StrengthToPercentile(int strength)
-    {
-      return strength / (double)100000;
-    }
 
     #region all possible hands
 		public static List<string> AllHighCards5Sorted { get; } = new List<string>
