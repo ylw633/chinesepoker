@@ -1,30 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ChinesePoker.Core.Component;
 using ChinesePoker.Core.Model;
-using Microsoft.ML;
-using Microsoft.ML.Core.Data;
-using Microsoft.ML.Runtime.Data;
 
 namespace ChinesePoker.ML
 {
   public class Predictor
   {
-    public class CategorizationPredictionData
-    {
-      public int PredictedLabel { get; set; }
-      //public float Probability { get; set; }
-    }
-
-    public class RegressionPredictionData
-    {
-      public float Score { get; set; }
-    }
-
     public void Go(string modelPath)
     {
       string line;
@@ -38,7 +20,7 @@ namespace ChinesePoker.ML
         var mlRounds = player.GetBestRoundsWithScore(sets[0], 10).ToList();
         var simpleRounds = playerSimple.GetBestRounds(sets[0], 10).ToList();
 
-        for (int i = 0; i < mlRounds.Count; i++)
+        for (var i = 0; i < mlRounds.Count; i++)
         {
           Console.WriteLine($"{mlRounds[i].Value,-4:0} {mlRounds[i].Key}");
           Console.WriteLine($"     {simpleRounds[i]}");
@@ -70,19 +52,13 @@ namespace ChinesePoker.ML
         var rounds = new[] {round1, round2, round3, round4};
         var result = scoreKeeper.GetScores(rounds).ToList();
 
-        for (int i = 0; i < 4; i++)
-        {
-          Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
-        }
+        for (var i = 0; i < 4; i++) Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
 
         Console.WriteLine("---------------------------");
         rounds = new[] {round0, round2, round3, round4};
         result = scoreKeeper.GetScores(rounds).ToList();
 
-        for (int i = 0; i < 4; i++)
-        {
-          Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
-        }
+        for (var i = 0; i < 4; i++) Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
 
         line = Console.ReadLine();
         Console.Clear();
@@ -96,11 +72,11 @@ namespace ChinesePoker.ML
       var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthStrategy);
 
       int rA = 0, rB = 0;
-      for (int k = 0; k < 100; k++)
+      for (var k = 0; k < 100; k++)
       {
         var gameResultA = new int[4];
         var gameResultB = new int[4];
-    
+
         var gameCount = 0;
         while (gameCount < 20)
         {
@@ -115,11 +91,11 @@ namespace ChinesePoker.ML
           var typeB = new[] {round1, round2, round3, round4};
 
           var result = scoreKeeper.GetScores(typeA).ToList();
-          for (int i = 0; i < 4; i++)
+          for (var i = 0; i < 4; i++)
             gameResultA[i] += result[i].Value;
 
           result = scoreKeeper.GetScores(typeB).ToList();
-          for (int i = 0; i < 4; i++)
+          for (var i = 0; i < 4; i++)
             gameResultB[i] += result[i].Value;
 
           gameCount++;
@@ -135,6 +111,17 @@ namespace ChinesePoker.ML
       }
 
       Console.ReadLine();
+    }
+
+    public class CategorizationPredictionData
+    {
+      public int PredictedLabel { get; set; }
+      //public float Probability { get; set; }
+    }
+
+    public class RegressionPredictionData
+    {
+      public float Score { get; set; }
     }
   }
 }

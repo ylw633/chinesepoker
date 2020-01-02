@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using ChinesePoker.Core.Helper;
 using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
@@ -169,6 +172,25 @@ namespace ChinesePoker.Core.Component.HandBuilders
       var firstSuit = cards[0].Suit;
       return cards.Skip(1).All(c => c.Suit == firstSuit);
 		}
+
+    public static IEnumerable<(string type, string cards)> StrengthToCards(int strength, int round)
+    {
+      if (round == 1)
+      {
+        return GetMatchingHands(ThirteenCardsStrengthLookup).Concat(GetMatchingHands(ThreeCardsStrengthLookup));
+      }
+
+      return round < 4 ? GetMatchingHands(FiveCardsStrengthLookup) : Enumerable.Empty<(string type, string cards)>();
+
+      IEnumerable<(string type, string cards)> GetMatchingHands(Dictionary<HandTypes, HandStats> src)
+      {
+        return from l in src.Values
+          let t = l.Type
+          from s in l.HandStrength
+          where s.Value == strength
+          select (l.Type.ToString(), s.Key);
+      }
+    }
 
     #region all possible hands
 		public static List<string> AllHighCards5Sorted { get; } = new List<string>

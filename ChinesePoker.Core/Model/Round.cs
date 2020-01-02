@@ -26,10 +26,10 @@ namespace ChinesePoker.Core.Model
   #region for machine learning
   public class RoundData
   {
-    public int FirstHandStrength { get; set; }
-    public int MiddleHandStrength { get; set; }
-    public int LastHandStrength { get; set; }
-    public int Score { get; set; }
+    public float FirstHandStrength { get; set; }
+    public float MiddleHandStrength { get; set; }
+    public float LastHandStrength { get; set; }
+    public float Score { get; set; }
   }
   #endregion
 

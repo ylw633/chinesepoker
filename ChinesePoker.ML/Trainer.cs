@@ -1,112 +1,150 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ChinesePoker.Core.Model;
 using Common;
 using Microsoft.ML;
-using Microsoft.ML.Runtime.Api;
-using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Data;
+using Microsoft.ML.Trainers;
+using Microsoft.ML.Transforms;
 
 namespace ChinesePoker.ML
 {
   public class Trainer
   {
-    public class RoundData
-    {
-      public int FirstHandStrength { get; set; }
-      public int MiddleHandStrength { get; set; }
-      public int LastHandStrength { get; set; }
-      public int Score { get; set; }
-    }
+    //public void CategorizationTraining(string dataFileName, string modelPath)
+    //{
+    //  var mlContext = new MLContext();
+    //  var trainingDataView = mlContext.Data.LoadFromTextFile<RoundData>(dataFileName, ' ');
 
-    public void CategorizationTraining(string dataFileName, string modelPath)
+    //  var dataPipeline = mlContext.Transforms.Conversion.MapValueToKey(nameof(RoundData.Score), "Label").Append(CategoricalCatalog.OneHotEncoding(mlContext.Transforms.Categorical, nameof(RoundData.FirstHandStrength)))
+    //    .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
+    //    .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
+    //    .Append(mlContext.Transforms.Concatenate("Features",
+    //      nameof(RoundData.FirstHandStrength),
+    //      nameof(RoundData.MiddleHandStrength),
+    //      nameof(RoundData.LastHandStrength)))
+    //    .AppendCacheCheckpoint(mlContext);
+    //  var trainer = mlContext.MulticlassClassification.Trainers.NaiveBayes();
+
+    //  //var averagedPerceptronBinaryTrainer = mlContext.BinaryClassification.Trainers.AveragedPerceptron(numIterations: 10);
+    //  //var trainer = mlContext.MulticlassClassification.Trainers.OneVersusAll(averagedPerceptronBinaryTrainer);
+
+    //  var trainerPipeline = dataPipeline.Append(trainer)
+    //    .Append(ConversionsExtensionsCatalog.MapKeyToValue(mlContext.Transforms.Conversion, "PredictedLabel"));
+
+
+    //  var preview = dataView.Preview();
+    //  var transPreview = DebuggerExtensions.Preview(trainerPipeline, dataView);
+
+    //  //var crossValidationResults = mlContext.MulticlassClassification.CrossValidate(dataView, trainerPipeline);
+    //  //ConsoleHelper.PrintMulticlassClassificationFoldsAverageMetrics(trainer.ToString(), crossValidationResults);
+
+    //  var model = trainerPipeline.Fit(dataView);
+
+    //  using (var sw = new FileStream(modelPath, FileMode.Create, FileAccess.Write, FileShare.Write))
+    //  {
+    //    mlContext.Model.Save(model, sw);
+    //  }
+
+    //  ConsoleHelper.ConsolePressAnyKey();
+    //}
+
+    private void Training<TM, TT>(string dataFileName, string modelPath, Func<MLContext, TT> appendTrainer) where TT : IEstimator<ITransformer>
     {
       var mlContext = new MLContext();
-      var reader =  mlContext.Data.TextReader(new TextLoader.Arguments()
-      {
-        Separator = " ",
-        HasHeader = false,
-        Column = new[]
-        {
-          new TextLoader.Column(nameof(RoundData.FirstHandStrength), DataKind.I4, 0),
-          new TextLoader.Column(nameof(RoundData.MiddleHandStrength), DataKind.I4, 1),
-          new TextLoader.Column(nameof(RoundData.LastHandStrength), DataKind.I4, 2),
-          new TextLoader.Column(nameof(RoundData.Score), DataKind.I4, 3),
-        }
-      });
+      var trainingDataView = mlContext.Data.LoadFromTextFile<TM>(dataFileName, ' ');
 
-      var dataView = reader.Read(dataFileName);
-      var dataPipeline = mlContext.Transforms.Conversion.MapValueToKey(nameof(RoundData.Score), "Label")
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Transforms.Concatenate("Features",
-          nameof(RoundData.FirstHandStrength),
-          nameof(RoundData.MiddleHandStrength),
-          nameof(RoundData.LastHandStrength)))
-        .AppendCacheCheckpoint(mlContext);
-      var trainer = mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent();
+      var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label", nameof(RoundData.Score))
+        .Append(mlContext.Transforms.Concatenate("Features", nameof(RoundData.FirstHandStrength), nameof(RoundData.MiddleHandStrength), nameof(RoundData.LastHandStrength)))
+        .Append(mlContext.Transforms.Conversion.MapKeyToValue(nameof(RoundData.Score), "Label"));
 
-      //var averagedPerceptronBinaryTrainer = mlContext.BinaryClassification.Trainers.AveragedPerceptron(numIterations: 10);
-      //var trainer = mlContext.MulticlassClassification.Trainers.OneVersusAll(averagedPerceptronBinaryTrainer);
+      
+      //ConsoleHelper.PeekDataViewInConsole(mlContext, trainingDataView, dataProcessPipeline, 5);
+      //ConsoleHelper.PeekVectorColumnDataInConsole(mlContext, "Features", trainingDataView, dataProcessPipeline, 5);
 
-      var trainerPipeline = dataPipeline.Append(trainer).Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+      //var trainer = mlContext.Regression.Trainers.Sdca(labelColumnName: "Label", featureColumnName: "Features");
+      var trainingPipeline = dataProcessPipeline.Append(appendTrainer(mlContext));
 
+      var trainedModel = trainingPipeline.Fit(trainingDataView);
+      //var trainedModel = dataProcessPipeline.Fit(trainingDataView);
 
-      var preview = dataView.Preview();
-      var transPreview = trainerPipeline.Preview(dataView);
+      //var testDataView = mlContext.Data.LoadFromTextFile<RoundData>(@"D:\ws\temp\cpRecords.txt", ' ', false);
 
-      //var crossValidationResults = mlContext.MulticlassClassification.CrossValidate(dataView, trainerPipeline);
-      //ConsoleHelper.PrintMulticlassClassificationFoldsAverageMetrics(trainer.ToString(), crossValidationResults);
+      //IDataView predictions = trainedModel.Transform(testDataView);
+      //var metrics = mlContext.Regression.Evaluate(predictions, labelColumnName: "Label", scoreColumnName: "Score");
+      //Common.ConsoleHelper.PrintRegressionMetrics(trainer.ToString(), metrics);
 
-      var model = trainerPipeline.Fit(dataView);
 
       using (var sw = new FileStream(modelPath, FileMode.Create, FileAccess.Write, FileShare.Write))
       {
-        mlContext.Model.Save(model, sw);
+        mlContext.Model.Save(trainedModel, trainingDataView.Schema, sw);
       }
 
-      ConsoleHelper.ConsolePressAnyKey();
+      //ConsoleHelper.ConsolePressAnyKey();
     }
 
     public void RegressionTraining(string dataFileName, string modelPath)
     {
-      var mlContext = new MLContext();
-      var reader =  mlContext.Data.TextReader(new TextLoader.Arguments()
+      Training<RoundData, IEstimator<ITransformer>>(dataFileName, GetRegressionModelPath(modelPath), mlContext => mlContext.Regression.Trainers.Sdca());
+    }
+
+    public void RankingTraining(string dataFileName, string modelPath)
+    {
+      Training<RoundData, IEstimator<ITransformer>>(dataFileName, GetrankingModelPath(modelPath), mlContext => mlContext.Ranking.Trainers.FastTree());
+    }
+
+    public void CategorizationTraining(string dataFileName, string modelPath)
+    {
+      Training<CatRoundData, IEstimator<ITransformer>>(dataFileName, GetCategorizationModelPath(modelPath), mlContext => mlContext.MulticlassClassification.Trainers.NaiveBayes());
+    }
+
+    public static string GetRegressionModelPath(string modelPath)
+    {
+      return Path.Combine(modelPath, "cpmodel-regression.zip");
+    }
+
+    public static string GetrankingModelPath(string modelPath)
+    {
+      return Path.Combine(modelPath, "cpmodel-ranking.zip");
+    }
+
+    public static string GetCategorizationModelPath(string modelPath)
+    {
+      return Path.Combine(modelPath, "cpmodel-categorization.zip");
+    }
+
+    public class RoundData
+    {
+      public RoundData(int result)
       {
-        Separator = " ",
-        HasHeader = false,
-        Column = new[]
-        {
-          new TextLoader.Column(nameof(RoundData.FirstHandStrength), DataKind.I4, 0),
-          new TextLoader.Column(nameof(RoundData.MiddleHandStrength), DataKind.I4, 1),
-          new TextLoader.Column(nameof(RoundData.LastHandStrength), DataKind.I4, 2),
-          new TextLoader.Column(nameof(RoundData.Score), DataKind.R4, 3),
-        }
-      });
-
-      var dataView = reader.Read(dataFileName);
-
-      var pipeline = mlContext.Transforms.CopyColumns(nameof(RoundData.Score), "Label")
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.FirstHandStrength)))
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.MiddleHandStrength)))
-        .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Transforms.Concatenate("Features",
-          nameof(RoundData.FirstHandStrength),
-          nameof(RoundData.MiddleHandStrength),
-          nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Regression.Trainers.StochasticDualCoordinateAscent());
-
-      var preview = dataView.Preview();
-      var transPreview = pipeline.Preview(dataView);
-      var model = pipeline.Fit(dataView);
-
-      using (var sw = new FileStream(modelPath, FileMode.Create, FileAccess.Write, FileShare.Write))
-      {
-        mlContext.Model.Save(model, sw);
+        Score = result;
       }
+
+      [LoadColumn(0)]
+      public float FirstHandStrength { get; set; }
+      [LoadColumn(1)]
+      public float MiddleHandStrength { get; set; }
+      [LoadColumn(2)]
+      public float LastHandStrength { get; set; }
+      [LoadColumn(3)]
+      public float Score { get; set; }
+    }
+
+    public class CatRoundData
+    {
+      public CatRoundData(int result)
+      {
+        Score = result;
+      }
+
+      [LoadColumn(0)]
+      public float FirstHandStrength { get; set; }
+      [LoadColumn(1)]
+      public float MiddleHandStrength { get; set; }
+      [LoadColumn(2)]
+      public float LastHandStrength { get; set; }
+      [LoadColumn(3)]
+      public int Score { get; set; }
     }
   }
 }

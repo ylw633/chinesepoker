@@ -9,14 +9,14 @@ namespace ChinesePoker.ML
 {
   class Program
   {
-    public const string RawDataPath = @"D:\ws\temp\cpRecords.txt";
-    public const string TrainedModelPath = @"D:\ws\temp\cpModel2.zip";
+    public const string RawDataPath = @"D:\ws\temp\cpRecords_validate.txt";
+    public const string TrainedModelPath = @"D:\ws\temp\";
 
     static void Main(string[] args)
     {
       //GenerateData();
-      //Train();
-      Prediction();
+      Train();
+      //Prediction();
     }
 
     static void GenerateData()
@@ -28,6 +28,7 @@ namespace ChinesePoker.ML
     static void Train()
     {
       var trainer = new Trainer();
+      //trainer.RankingTraining(RawDataPath, TrainedModelPath);
       trainer.RegressionTraining(RawDataPath, TrainedModelPath);
       //trainer.CategorizationTraining(RawDataPath, TrainedModelPath);
     }
