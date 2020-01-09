@@ -59,7 +59,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
     }
   }
 
-	public class PokerStrengthStrategy : IStrengthStrategy
+	public class PokerStrengthStrategy : IHandStrengthArbiter
 	{
 		#region static preparation
 
@@ -106,7 +106,7 @@ namespace ChinesePoker.Core.Component.HandBuilders
       {
         case 13:
 					if (ThirteenCardsStrengthLookup[HandTypes.Dragon].HandStrength.ContainsKey(cardRank))
-						return new Hand($"{nameof(HandTypes.Dragon)}", cardList, ThreeCardsStrengthLookup[HandTypes.Dragon].HandStrength[cardRank]);
+						return new Hand($"{nameof(HandTypes.Dragon)}", cardList, ThirteenCardsStrengthLookup[HandTypes.Dragon].HandStrength[cardRank]);
           break;
 
         case 5:

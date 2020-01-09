@@ -13,14 +13,14 @@ namespace ChinesePoker.Core.Component
 
   public class PokerHandBuilderManager : IGameHandsManager
   {
-    public IStrengthStrategy StrengthStrategy { get; } = new PokerStrengthStrategy();
+    public IHandStrengthArbiter StrengthArbiter { get; } = new PokerStrengthStrategy();
 
     public Hand DetermineHand(IEnumerable<Card> cards, Hand maxHand = null)
     {
       var cardList = cards.OrderBy(c => c.Ordinal).ToList();
-      var hand = StrengthStrategy.GetAHand(cardList);
+      var hand = StrengthArbiter.GetAHand(cardList);
 
-      return hand == null || (maxHand != null && StrengthStrategy.CompareHands(hand, maxHand) >= 0) ? null : hand;
+      return hand == null || (maxHand != null && StrengthArbiter.CompareHands(hand, maxHand) >= 0) ? null : hand;
     }
   }
 }

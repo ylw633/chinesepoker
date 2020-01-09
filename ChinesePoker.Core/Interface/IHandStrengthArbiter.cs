@@ -7,7 +7,7 @@ using ChinesePoker.Core.Model;
 
 namespace ChinesePoker.Core.Interface
 {
-  public interface IStrengthStrategy
+  public interface IHandStrengthArbiter
   {
     int CardRankToStrength(char rank);
     Hand GetAHand(IEnumerable<Card> cards);

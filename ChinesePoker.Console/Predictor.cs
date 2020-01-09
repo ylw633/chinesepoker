@@ -1,20 +1,22 @@
-﻿using System;
-using System.Linq;
-using ChinesePoker.Core.Component;
+﻿using ChinesePoker.Core.Component;
+using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
+using ChinesePoker.ML.Component;
+using System.Linq;
+using Console = System.Console;
 
-namespace ChinesePoker.ML
+namespace ChinesePoker.Console
 {
   public class Predictor
   {
-    public void Go(string modelPath)
+    public void Go(IRoundStrategy player)
     {
       string line;
       do
       {
         var sets = Dealer.Deal().ToList();
-        //var player = new CategorizationMlStrategy(modelPath);
-        var player = new RegressionMlStrategy(modelPath);
+        //var set = Dealer.GetCards("SA HT CQ D2 H3 H4 S5 S6 H5 H7 HJ HQ HK");
+        //sets[0] = set;
         var playerSimple = new SimpleRoundStrategy();
 
         var mlRounds = player.GetBestRoundsWithScore(sets[0], 10).ToList();
@@ -22,13 +24,13 @@ namespace ChinesePoker.ML
 
         for (var i = 0; i < mlRounds.Count; i++)
         {
-          Console.WriteLine($"{mlRounds[i].Value,-4:0} {mlRounds[i].Key}");
-          Console.WriteLine($"     {simpleRounds[i]}");
-          Console.WriteLine("======================");
+          System.Console.WriteLine($"{mlRounds[i].Value,-4:0} {mlRounds[i].Key}");
+          System.Console.WriteLine($"     {simpleRounds[i]}");
+          System.Console.WriteLine("======================");
         }
 
-        line = Console.ReadLine();
-        Console.Clear();
+        line = System.Console.ReadLine();
+        System.Console.Clear();
       } while (line != "q");
     }
 
@@ -36,7 +38,7 @@ namespace ChinesePoker.ML
     {
       var mlStrategy = new RegressionMlStrategy(modelPath);
       var simpleStrategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthStrategy);
+      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthArbiter);
 
       string line;
       do
@@ -52,24 +54,24 @@ namespace ChinesePoker.ML
         var rounds = new[] {round1, round2, round3, round4};
         var result = scoreKeeper.GetScores(rounds).ToList();
 
-        for (var i = 0; i < 4; i++) Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
+        for (var i = 0; i < 4; i++) System.Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
 
-        Console.WriteLine("---------------------------");
+        System.Console.WriteLine("---------------------------");
         rounds = new[] {round0, round2, round3, round4};
         result = scoreKeeper.GetScores(rounds).ToList();
 
-        for (var i = 0; i < 4; i++) Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
+        for (var i = 0; i < 4; i++) System.Console.WriteLine($"{result[i].Key}\n{result[i].Value}");
 
-        line = Console.ReadLine();
-        Console.Clear();
+        line = System.Console.ReadLine();
+        System.Console.Clear();
       } while (line != "q");
     }
 
-    public void SimulationComparison(string modelPath)
+    public void SimulationComparison(IRoundStrategy player)
     {
-      var mlStrategy = new CategorizationMlStrategy(modelPath);
+      var mlStrategy = player;
       var simpleStrategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthStrategy);
+      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthArbiter);
 
       int rA = 0, rB = 0;
       for (var k = 0; k < 100; k++)
@@ -104,24 +106,13 @@ namespace ChinesePoker.ML
         rA += gameResultA[0];
         rB += gameResultB[0];
 
-        Console.WriteLine($"{string.Join(" ", gameResultA)}");
-        Console.WriteLine($"{string.Join(" ", gameResultB)}");
-        Console.WriteLine(rA - rB);
-        Console.WriteLine("-------------------");
+        System.Console.WriteLine($"{string.Join(" ", gameResultA)}");
+        System.Console.WriteLine($"{string.Join(" ", gameResultB)}");
+        System.Console.WriteLine(rA - rB);
+        System.Console.WriteLine("-------------------");
       }
 
-      Console.ReadLine();
-    }
-
-    public class CategorizationPredictionData
-    {
-      public int PredictedLabel { get; set; }
-      //public float Probability { get; set; }
-    }
-
-    public class RegressionPredictionData
-    {
-      public float Score { get; set; }
+      System.Console.ReadLine();
     }
   }
 }

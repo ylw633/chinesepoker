@@ -12,7 +12,7 @@ namespace ChinesePoker.Core.Component
 {
   public class TaiwaneseScoreCalculator : IScoreCalculator
   {
-    public IStrengthStrategy StrengthStrategy { get; set; }
+    public IHandStrengthArbiter StrengthStrategy { get; set; }
 
     public int StrikeBonus { get; set; } = 3;
     public int ThreeOfKindInFirstRoundBonus { get; set; } = 3;
@@ -23,7 +23,7 @@ namespace ChinesePoker.Core.Component
     public int DragonBonus { get; set; } = 36;
     public int HomeRunBonus { get; set; } = 6;
 
-    public TaiwaneseScoreCalculator(IStrengthStrategy strengthStrategy)
+    public TaiwaneseScoreCalculator(IHandStrengthArbiter strengthStrategy)
     {
       StrengthStrategy = strengthStrategy;
     }

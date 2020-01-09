@@ -17,7 +17,7 @@ namespace ChinesePoker.Core.Helper
       var hand = handsManager.DetermineHand(cards); // check if it's a dragon
       if (hand != null) // it's a dragon
       {
-        yield return new Round(new List<Hand> { hand }, handsManager.StrengthStrategy.ComputeHandsStrength(new List<Hand> { hand }));
+        yield return new Round(new List<Hand> { hand }, handsManager.StrengthArbiter.ComputeHandsStrength(new List<Hand> { hand }));
         yield break;
       }
 
@@ -42,7 +42,7 @@ namespace ChinesePoker.Core.Helper
             continue;
           hash.Add(hashKey);
           var hands = new List<Hand> {firstRound, secondRound, thirdRound};
-          yield return new Round(hands, handsManager.StrengthStrategy.ComputeHandsStrength(hands));
+          yield return new Round(hands, handsManager.StrengthArbiter.ComputeHandsStrength(hands));
         }
       }
     }

@@ -28,5 +28,10 @@ namespace ChinesePoker.Core.Component
     {
       return GetPossibleRounds(cards).OrderByDescending(r => r.Strength).Take(take);
     }
+
+    public IEnumerable<KeyValuePair<Round, object>> GetBestRoundsWithScore(IList<Card> cards, int take = 1)
+    {
+      return GetBestRounds(cards, take).ToDictionary(r => r, r => (object)r.Strength);
+    }
   }
 }
