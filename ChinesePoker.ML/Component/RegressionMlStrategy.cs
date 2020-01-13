@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using ChinesePoker.Core.Component;
 using ChinesePoker.Core.Helper;
 using ChinesePoker.Core.Model;
 using ChinesePoker.ML.Model;
@@ -7,7 +9,7 @@ using Microsoft.ML.Data;
 
 namespace ChinesePoker.ML.Component
 {
-  public class RegressionMlStrategy : MlStrategyBase<RoundData, RegressionMlStrategy.PredictionData>
+  public class RegressionMlStrategy : MlStrategyBase<RoundData<float>, RegressionMlStrategy.PredictionData>
   {
     public RegressionMlStrategy() : base(@"model-regression.zip")
     {
@@ -17,9 +19,17 @@ namespace ChinesePoker.ML.Component
     {
     }
 
-    protected override Dictionary<Round, object> GetPrediction(IList<Card> cards)
+    protected override Dictionary<Round, int> GetPrediction(IList<Card> cards)
     {
-      return GameHandsManager.GetAllPossibleRounds(cards).ToDictionary(r => r, r => Oracle.Predict(new RoundData(r)).Score as object);
+      var rounds = new SimpleRoundStrategy().GetBestRounds(cards, int.MaxValue).ToList();
+      var result = new Dictionary<Round, int>();
+      for (var i = 0; i < rounds.Count; i++)
+      {
+        var predict = Oracle.Predict(new RoundData<float>(rounds[i], i));
+        result.Add(rounds[i], (int)Math.Round(predict.Score));
+      }
+
+      return result;
     }
 
     #region ML data class
@@ -27,7 +37,7 @@ namespace ChinesePoker.ML.Component
     public class PredictionData
     {
       [ColumnName("Score")]
-      public float[] Score { get; set; }
+      public float Score { get; set; }
     }
     
     #endregion

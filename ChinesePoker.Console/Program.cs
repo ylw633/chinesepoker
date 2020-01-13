@@ -21,15 +21,15 @@ namespace ChinesePoker.Console
     {
       //GenerateData();
       //return;
-      ActiveLearner = Learners[1];
+      ActiveLearner = Learners[0];
       Train();
-      //Prediction();
+      Prediction();
     }
 
     static void GenerateData()
     {
       var gen = new PlayRecordGenerator();
-      gen.Go(RawDataPath, 2_000_000);
+      gen.Go(RawDataPath, 5_000_000);
     }
 
     static void Train()
@@ -40,7 +40,7 @@ namespace ChinesePoker.Console
     static void Prediction()
     {
       var predictor = new Predictor();
-      predictor.SimulationComparison(ActiveLearner.GetStrategy(TrainedModelPath));
+      //predictor.SimulationComparison(Learners.Select(l => l.GetStrategy(TrainedModelPath)));
       predictor.Go(ActiveLearner.GetStrategy(TrainedModelPath));
     }
   }

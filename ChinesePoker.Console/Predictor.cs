@@ -1,4 +1,5 @@
-﻿using ChinesePoker.Core.Component;
+﻿using System.Collections.Generic;
+using ChinesePoker.Core.Component;
 using ChinesePoker.Core.Interface;
 using ChinesePoker.Core.Model;
 using ChinesePoker.ML.Component;
@@ -67,52 +68,69 @@ namespace ChinesePoker.Console
       } while (line != "q");
     }
 
-    public void SimulationComparison(IRoundStrategy player)
+    public void SimulationComparison(IEnumerable<IRoundStrategy> player)
     {
-      var mlStrategy = player;
-      var simpleStrategy = new SimpleRoundStrategy();
-      var scoreKeeper = new TaiwaneseScoreCalculator(simpleStrategy.GameHandsManager.StrengthArbiter);
+      var scoreCalculator = new TaiwaneseScoreCalculator(new PokerHandBuilderManager().StrengthArbiter);
+
+      var scoreKeeper = new [] { new SimpleRoundStrategy() }.Concat(player).Select(s => new ScoreKeeper {Strategy = s}).ToList();
 
       int rA = 0, rB = 0;
       for (var k = 0; k < 100; k++)
       {
-        var gameResultA = new int[4];
-        var gameResultB = new int[4];
+        foreach (var s in scoreKeeper)
+          s.TempScore = new int[4];
 
         var gameCount = 0;
         while (gameCount < 20)
         {
           var sets = Dealer.Deal().ToList();
-          var round0 = mlStrategy.GetBestRound(sets[0]);
-          var round1 = simpleStrategy.GetBestRound(sets[0]);
-          var round2 = simpleStrategy.GetBestRound(sets[1]);
-          var round3 = simpleStrategy.GetBestRound(sets[2]);
-          var round4 = simpleStrategy.GetBestRound(sets[3]);
+          var round2 = scoreKeeper[0].Strategy.GetBestRound(sets[1]);
+          var round3 = scoreKeeper[0].Strategy.GetBestRound(sets[2]);
+          var round4 = scoreKeeper[0].Strategy.GetBestRound(sets[3]);
 
-          var typeA = new[] {round0, round2, round3, round4};
-          var typeB = new[] {round1, round2, round3, round4};
+          foreach (var role in scoreKeeper)
+          {
+            var round = role.Strategy.GetBestRound(sets[0]);
+            var result = scoreCalculator.GetScores(new[] {round, round2, round3, round4}).Select(r => r.Value).ToList();
+            for (var i = 0; i < 4; i++)
+              role.TempScore[i] += result[i];
+          }
 
-          var result = scoreKeeper.GetScores(typeA).ToList();
-          for (var i = 0; i < 4; i++)
-            gameResultA[i] += result[i].Value;
+          //var typeA = new[] {round0, round2, round3, round4};
+          //var typeB = new[] {round1, round2, round3, round4};
 
-          result = scoreKeeper.GetScores(typeB).ToList();
-          for (var i = 0; i < 4; i++)
-            gameResultB[i] += result[i].Value;
+          //var result = scoreCalculator.GetScores(typeA).ToList();
+          //for (var i = 0; i < 4; i++)
+          //  gameResultA[i] += result[i].Value;
+
+          //result = scoreCalculator.GetScores(typeB).ToList();
+          //for (var i = 0; i < 4; i++)
+          //  gameResultB[i] += result[i].Value;
 
           gameCount++;
         }
 
-        rA += gameResultA[0];
-        rB += gameResultB[0];
+        foreach (var role in scoreKeeper)
+        {
+          role.TotalScore += role.TempScore[0];
+        }
 
-        System.Console.WriteLine($"{string.Join(" ", gameResultA)}");
-        System.Console.WriteLine($"{string.Join(" ", gameResultB)}");
-        System.Console.WriteLine(rA - rB);
+        foreach (var role in scoreKeeper)
+        {
+          System.Console.WriteLine($"{role.Strategy.GetType().Name.Substring(0, 5)} {role.TotalScore - scoreKeeper[0].TotalScore,4} {role.TotalScore,5} {role.TempScore[0],4} {role.TempScore[1],4} {role.TempScore[2],4} {role.TempScore[3],4}");
+        }
+
         System.Console.WriteLine("-------------------");
       }
 
       System.Console.ReadLine();
+    }
+
+    public class ScoreKeeper
+    {
+      public IRoundStrategy Strategy { get; set; }
+      public int TotalScore { get; set; }
+      public int[] TempScore { get; set; }
     }
   }
 }

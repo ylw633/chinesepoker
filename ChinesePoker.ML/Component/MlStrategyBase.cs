@@ -27,7 +27,7 @@ namespace ChinesePoker.ML.Component
     protected PredictionEngine<TModel, TPrediction> Oracle { get; set; }
     public IGameHandsManager GameHandsManager { get; set; } = new PokerHandBuilderManager();
 
-    protected virtual Func<IEnumerable<KeyValuePair<Round, object>>, IOrderedEnumerable<KeyValuePair<Round, object>>>
+    protected virtual Func<IEnumerable<KeyValuePair<Round, int>>, IOrderedEnumerable<KeyValuePair<Round, int>>>
       Ordering { get; } = enu => enu.OrderByDescending(r => r.Value).ThenByDescending(r => r.Key.Strength);
 
     public IEnumerable<Round> GetPossibleRounds(IList<Card> cards)
@@ -43,14 +43,14 @@ namespace ChinesePoker.ML.Component
       return Ordering(rounds).Take(take).Select(r => r.Key);
     }
 
-    public IEnumerable<KeyValuePair<Round, object>> GetBestRoundsWithScore(IList<Card> cards, int take = 1)
+    public IEnumerable<KeyValuePair<Round, int>> GetBestRoundsWithScore(IList<Card> cards, int take = 1)
     {
       var rounds = GetPrediction(cards).GroupBy(r => string.Join("_", r.Key.Hands.Select(h => h.Name)))
         .Select(typeCombo => Ordering(typeCombo).First());
       return Ordering(rounds).Take(take);
     }
 
-    protected abstract Dictionary<Round, object> GetPrediction(IList<Card> cards);
+    protected abstract Dictionary<Round, int> GetPrediction(IList<Card> cards);
 
     public Round GetBestRound(IList<Card> cards)
     {

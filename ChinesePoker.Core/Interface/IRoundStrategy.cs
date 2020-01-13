@@ -12,6 +12,6 @@ namespace ChinesePoker.Core.Interface
     IEnumerable<Round> GetPossibleRounds(IList<Card> cards);
     IEnumerable<Round> GetBestRounds(IList<Card> cards, int take = 1);
     Round GetBestRound(IList<Card> cards);
-    IEnumerable<KeyValuePair<Round, object>> GetBestRoundsWithScore(IList<Card> cards, int take = 1);
+    IEnumerable<KeyValuePair<Round, int>> GetBestRoundsWithScore(IList<Card> cards, int take = 1);
   }
 }
