@@ -22,7 +22,7 @@ namespace ChinesePoker.Core.Tests
       var roundB = strategy.GetBestRound(sets[1]);
 
       var calculator = new TaiwaneseScoreCalculator(new PokerStrengthStrategy());
-      calculator.GetScore(roundA, roundB, out var scoreA, out var scoreB);
+      calculator.GetScore(roundA, roundB, out int scoreA, out var scoreB);
 
       Assert.Equal(scoreA, -scoreB);
       Assert.Equal(0, scoreA + scoreB);

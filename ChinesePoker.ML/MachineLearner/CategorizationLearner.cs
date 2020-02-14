@@ -21,23 +21,23 @@ namespace ChinesePoker.ML.MachineLearner
       var trainingDataView = mlContext.Data.LoadFromTextFile<RoundData<int>>(dataFileName, ',');
 
       var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label", nameof(RoundData<int>.Score), keyOrdinality: ValueToKeyMappingEstimator.KeyOrdinality.ByOccurrence)
-        .Append(mlContext.Transforms.NormalizeMeanVariance("R1", nameof(RoundData<int>.FirstHandStrength)))
-        .Append(mlContext.Transforms.NormalizeMeanVariance("R2", nameof(RoundData<int>.MiddleHandStrength)))
-        .Append(mlContext.Transforms.NormalizeMeanVariance("R3", nameof(RoundData<int>.LastHandStrength)))
+        //.Append(mlContext.Transforms.NormalizeMeanVariance("R1", nameof(RoundData<int>.FirstHandStrength)))
+        //.Append(mlContext.Transforms.NormalizeMeanVariance("R2", nameof(RoundData<int>.MiddleHandStrength)))
+        //.Append(mlContext.Transforms.NormalizeMeanVariance("R3", nameof(RoundData<int>.LastHandStrength)))
 
         //.Append(mlContext.Transforms.Categorical.OneHotEncoding("R1", nameof(RoundData.FirstHandStrength)))
         //.Append(mlContext.Transforms.Categorical.OneHotEncoding("R2", nameof(RoundData.MiddleHandStrength)))
         //.Append(mlContext.Transforms.Categorical.OneHotEncoding("R3", nameof(RoundData.LastHandStrength)))
-        .Append(mlContext.Transforms.Text.FeaturizeText("R4", nameof(RoundData<int>.FirstHandType)))
-        .Append(mlContext.Transforms.Text.FeaturizeText("R5", nameof(RoundData<int>.MiddleHandType)))
-        .Append(mlContext.Transforms.Text.FeaturizeText("R6", nameof(RoundData<int>.LastHandType)))
+        //.Append(mlContext.Transforms.Text.FeaturizeText("R4", nameof(RoundData<int>.FirstHandType)))
+        //.Append(mlContext.Transforms.Text.FeaturizeText("R5", nameof(RoundData<int>.MiddleHandType)))
+        //.Append(mlContext.Transforms.Text.FeaturizeText("R6", nameof(RoundData<int>.LastHandType)))
         .Append(mlContext.Transforms.Text.FeaturizeText("Cards", new TextFeaturizingEstimator.Options(), "Card1", "Card2", "Card3", "Card4", "Card5", "Card6", "Card7", "Card8", "Card9", "Card10", "Card11", "Card12", "Card13"))
         .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData<int>.PlayerIndex)))
         .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData<int>.Player1RoundIndex)))
         .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData<int>.Player2RoundIndex)))
         .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData<int>.Player3RoundIndex)))
         .Append(mlContext.Transforms.Categorical.OneHotEncoding(nameof(RoundData<int>.Player4RoundIndex)))
-        .Append(mlContext.Transforms.Concatenate("Features", "R1", "R2", "R3", "R4", "R5", "R6", "Cards", 
+        .Append(mlContext.Transforms.Concatenate("Features", "Cards", 
           nameof(RoundData<int>.PlayerIndex),
           nameof(RoundData<int>.Player1RoundIndex),
           nameof(RoundData<int>.Player2RoundIndex),

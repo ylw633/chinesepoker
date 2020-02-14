@@ -111,7 +111,7 @@ namespace ChinesePoker.ML.Model
       }
 
       PlayerIndex = Player2RoundIndex = Player3RoundIndex = Player4RoundIndex = 0;
-      Player1RoundIndex = player1Index;
+      Player1RoundIndex = Math.Min(4, player1Index);
     }
   }
 }

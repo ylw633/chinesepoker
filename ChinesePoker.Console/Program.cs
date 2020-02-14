@@ -19,17 +19,19 @@ namespace ChinesePoker.Console
 
     static void Main(string[] args)
     {
-      //GenerateData();
-      //return;
-      ActiveLearner = Learners[0];
+      GenerateData();
+      return;
+      ActiveLearner = Learners[1];
       Train();
       Prediction();
     }
 
+
+
     static void GenerateData()
     {
       var gen = new PlayRecordGenerator();
-      gen.Go(RawDataPath, 5_000_000);
+      gen.Go(RawDataPath, 10_000_000);
     }
 
     static void Train()

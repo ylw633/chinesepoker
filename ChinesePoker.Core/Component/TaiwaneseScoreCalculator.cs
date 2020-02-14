@@ -16,7 +16,7 @@ namespace ChinesePoker.Core.Component
 
     public int StrikeBonus { get; set; } = 3;
     public int ThreeOfKindInFirstRoundBonus { get; set; } = 3;
-    public int FourOfKindInMiddleRoundBonus { get; set; } = 0;
+    public int FourOfKindInMiddleRoundBonus { get; set; } = 4;
     public int FourOfKindInLastRoundBonus { get; set; } = 4;
     public int StraightFlushInMiddleRoundBonus { get; set; } = 5;
     public int StraightFlushInLastRoundBonus { get; set; } = 5;
@@ -28,94 +28,149 @@ namespace ChinesePoker.Core.Component
       StrengthStrategy = strengthStrategy;
     }
 
-    public int GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
+    public TaiwaneseScoreCalculator() : this(new PokerStrengthStrategy())
     {
-      scoreA = scoreB = 0;
-      var strike = 0;
-
-      var pts = 0;
-
-      if (roundA.Hands.Count == 1)
-        pts += DragonBonus;
-      else if (roundB.Hands.Count == 1)
-        pts -= DragonBonus;
-      else
-      {
-        for (int i = 0; i < 3; i++)
-        {
-          pts += StrengthStrategy.CompareHands(roundA.Hands[i], roundB.Hands[i]);
-        }
-
-        if (pts == 3)
-        {
-          pts += StrikeBonus;
-          strike = 1;
-        }
-        else if (pts == -3)
-        {
-          pts -= StrikeBonus;
-          strike = -1;
-        }
-
-        pts += SpecialHandBonus(roundA) - SpecialHandBonus(roundB);
-        
-      }
-
-      scoreA += pts;
-      scoreB -= pts;
-
-      return strike;
     }
 
-    private class PlayerScore
+    public int GetScore(Round roundA, Round roundB, out int scoreA, out int scoreB)
     {
-      public int Score { get; set; }
-      public int StrikeCount { get; set; }
+      GetScore(roundA, roundB, out PlayerScore psA, out var psB);
+      scoreA = psA.TotalScore;
+      scoreB = psB.TotalScore;
+
+      return psA.StrikeCount > 0 ? 1 : psB.StrikeCount > 0 ? -1 : 0;
     }
 
     public Dictionary<Round, int> GetScores(IList<Round> rounds)
     {
-      //var result = rounds.ToDictionary<Round, (int score, int strike)>(r => (0, 0));
+      return GetScoresWithRoundWeight(rounds).ToDictionary(r => r.Key, r => r.Value.TotalScore);
+    }
+
+    public void GetScore(Round roundA, Round roundB, out PlayerScore scoreA, out PlayerScore scoreB)
+    {
+      scoreA = new PlayerScore();
+      scoreB = new PlayerScore();
+
+      if (roundA.Hands.Count == 1 || roundB.Hands.Count == 1)
+      {
+        if (roundA.Hands.Count == 1)
+        {
+          scoreA.TotalScore = DragonBonus;
+          scoreB.TotalScore = -DragonBonus;
+        }
+        else
+        {
+          scoreA.TotalScore = -DragonBonus;
+          scoreB.TotalScore = DragonBonus;
+        }
+
+        return;
+      }
+
+      var strike = 0;
+      var specialHandBonus = GetSpecialHandBonus();
+      for (int i = 0; i < 3; i++)
+      {
+        var result = StrengthStrategy.CompareHands(roundA.Hands[i], roundB.Hands[i]);
+        if (result > 0)
+        {
+          scoreA.RoundWeight[i]++;
+          strike++;
+        }
+        else if (result < 0)
+        {
+          scoreB.RoundWeight[i]++;
+          strike--;
+        }
+
+        scoreA.TotalScore += result;
+        scoreB.TotalScore -= result;
+
+        SquareOffSpecialHand(i, roundA, scoreA, scoreB);
+        SquareOffSpecialHand(i, roundB, scoreA, scoreB);
+      }
+
+      if (strike == 3)
+      {
+        SquareOffStrike(scoreA, scoreB);
+      }
+      else if (strike == -3)
+      {
+        SquareOffStrike(scoreB, scoreA);
+      }
+
+      void SquareOffSpecialHand(int roundIdx, Round targetRound, PlayerScore targetScore, PlayerScore opponentScore)
+      {
+        if (!specialHandBonus[roundIdx].ContainsKey(targetRound.Hands[roundIdx].Name))
+          return;
+
+        var bonus = specialHandBonus[roundIdx][targetRound.Hands[roundIdx].Name];
+        targetScore.RoundWeight[roundIdx] += bonus;
+        targetScore.TotalScore += bonus;
+        opponentScore.TotalScore -= bonus;
+      }
+
+      void SquareOffStrike(PlayerScore strikeScore, PlayerScore opponentScore)
+      {
+        strikeScore.StrikeCount = 1;
+        strikeScore.TotalScore += StrikeBonus;
+        opponentScore.StrikeCount = -1;
+        opponentScore.TotalScore -= StrikeBonus;
+      }
+    }
+
+    public Dictionary<Round, PlayerScore> GetScoresWithRoundWeight(IList<Round> rounds)
+    {
       var result = rounds.ToDictionary(r => r, r => new PlayerScore());
       foreach (var match in new Combinations<Round>(rounds.ToList(), 2, GenerateOption.WithoutRepetition))
       {
-        var strike = GetScore(match[0], match[1], out var scoreA, out var scoreB);
-        result[match[0]].Score += scoreA;
-        result[match[1]].Score += scoreB;
-        
-        if (strike == 1)
-          result[match[0]].StrikeCount++;
-        else if (strike == -1)
-          result[match[1]].StrikeCount++;
+        GetScore(match[0], match[1], out PlayerScore scoreA, out var scoreB);
+        CopyScore(result[match[0]], scoreA);
+        CopyScore(result[match[1]], scoreB);
       }
 
       // home run case
       var slugger = result.FirstOrDefault(kv => kv.Value.StrikeCount == 3);
       if (slugger.Value != null)
       {
-        slugger.Value.Score += HomeRunBonus * 3;
-        foreach (var otherPlayer in result.Except(new [] {slugger}))
-          otherPlayer.Value.Score -= HomeRunBonus;
+        slugger.Value.TotalScore += HomeRunBonus * 3;
+        foreach (var otherPlayer in result.Except(new[] { slugger }))
+          otherPlayer.Value.TotalScore -= HomeRunBonus;
       }
 
-      return result.ToDictionary(r => r.Key, r => r.Value.Score);
+      void CopyScore(PlayerScore targetScore, PlayerScore srcScore)
+      {
+        targetScore.TotalScore += srcScore.TotalScore;
+        targetScore.StrikeCount += srcScore.StrikeCount;
+        for (int i = 0; i < 3; i++)
+          targetScore.RoundWeight[i] += srcScore.RoundWeight[i];
+      }
+
+      return result;
     }
 
-    protected int SpecialHandBonus(Round round)
+    protected Dictionary<int, Dictionary<string, int>> GetSpecialHandBonus()
     {
-      return new[]
+      return new Dictionary<int, Dictionary<string, int>>
       {
-        GetScore(0, nameof(HandTypes.ThreeOfAKind), ThreeOfKindInFirstRoundBonus),
-        GetScore(1, nameof(HandTypes.FourOfAKind), FourOfKindInMiddleRoundBonus),
-        GetScore(1, nameof(HandTypes.StraightFlush), StraightFlushInMiddleRoundBonus),
-        GetScore(2, nameof(HandTypes.FourOfAKind), FourOfKindInLastRoundBonus),
-        GetScore(2, nameof(HandTypes.StraightFlush), StraightFlushInLastRoundBonus),
-      }.Sum();
-
-      int GetScore(int roundIdx, string handName, int bonus)
-      {
-        return round.Hands[roundIdx].Name == handName ? bonus : 0;
-      }
+        { 0, new Dictionary<string, int>
+          {
+            { nameof(HandTypes.ThreeOfAKind), ThreeOfKindInFirstRoundBonus },
+          }
+        },
+        { 1, new Dictionary<string, int>
+          {
+            { nameof(HandTypes.FourOfAKind), FourOfKindInMiddleRoundBonus },
+            { nameof(HandTypes.StraightFlush), StraightFlushInMiddleRoundBonus }
+          }
+        },
+        { 2, new Dictionary<string, int>
+          {
+            { nameof(HandTypes.FourOfAKind), FourOfKindInLastRoundBonus },
+            { nameof(HandTypes.StraightFlush), StraightFlushInLastRoundBonus }
+          }
+        }
+      };
     }
   }
 }
